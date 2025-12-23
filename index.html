@@ -265,10 +265,11 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    function startKickLogin(){
-        const provider = new firebase.auth.OAuthProvider("kick");
-        auth.signInWithPopup(provider).catch(e=>console.error(e));
-    }
+function startKickLogin(){
+    const provider = new firebase.auth.OAuthProvider("kick");
+    auth.signInWithRedirect(provider);
+}
+
 
     function logout(){ auth.signOut(); }
 
