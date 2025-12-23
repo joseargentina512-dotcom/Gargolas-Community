@@ -3,249 +3,384 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gargolas Community | MauroAKD</title>
+    <title>Gárgolas Community | MauroAKD</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Montserrat:wght@300;600;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
     
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
+            --bg-dark: #0a0a0a;
+            --panel-bg: #141414;
             --gold: #d4af37;
             --gold-bright: #f9e2af;
-            --black: #050505;
-            --dark-grey: #121212;
-            --text-white: #ffffff;
-            --gold-gradient: linear-gradient(135deg, #d4af37 0%, #f9e2af 50%, #b8860b 100%);
+            --gold-gradient: linear-gradient(135deg, #b8860b 0%, #f7d774 50%, #b8860b 100%);
+            --text-main: #e0e0e0;
+            --text-dim: #888;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background-color: var(--black); 
-            color: var(--text-white); 
-            font-family: 'Montserrat', sans-serif; 
-            scroll-behavior: smooth; 
-            overflow-x: hidden; 
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
         }
 
         /* NAVBAR */
         .navbar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 8%; background: rgba(0, 0, 0, 0.95);
-            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-            position: fixed; width: 100%; z-index: 1000; backdrop-filter: blur(10px);
+            background: rgba(10, 10, 10, 0.95);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-        .logo { font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 1.2rem; color: var(--gold); text-decoration: none; }
-        .logo span { color: white; font-weight: 400; }
 
-        .btn-kick {
-            background: #53fc18; color: black; padding: 10px 20px;
-            border-radius: 5px; font-weight: 900; text-decoration: none; transition: 0.3s;
+        .logo {
+            font-family: 'Syncopate', sans-serif;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+        }
+
+        .logo span {
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         /* HERO */
         .hero {
-            height: 70vh; display: flex; align-items: center; justify-content: center;
-            text-align: center; position: relative;
-            background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(5,5,5,1) 100%), 
-                        url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070') center/cover;
+            padding: 80px 20px;
+            text-align: center;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
         }
+
         .main-title {
-            font-family: 'Syncopate', sans-serif; font-size: clamp(2.5rem, 8vw, 5rem);
-            background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            font-weight: 700; margin-bottom: 10px;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            margin: 0;
+            letter-spacing: 12px;
+            font-family: 'Syncopate';
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.3));
         }
-        .sub-title { font-size: 1.2rem; letter-spacing: 8px; color: #888; text-transform: uppercase; }
 
-        /* SECCION PRINCIPAL */
-        .container { padding: 60px 8%; display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; }
-        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+        .sub-title {
+            color: var(--text-dim);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
 
-        .section-box { background: var(--dark-grey); border: 1px solid #222; border-radius: 10px; padding: 30px; }
-        .gold-label { border-left: 4px solid var(--gold); padding-left: 15px; margin-bottom: 25px; font-family: 'Syncopate'; font-size: 1rem; }
+        /* CONTENEDOR PRINCIPAL */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        .section-box {
+            background: var(--panel-bg);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        .gold-label {
+            border-left: 3px solid var(--gold);
+            padding-left: 15px;
+            margin-bottom: 25px;
+        }
+
+        .gold-label h2 {
+            margin: 0;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--gold);
+        }
 
         /* TABLA RANKING */
-        .ranking-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .ranking-table th { text-align: left; color: #555; font-size: 0.7rem; padding-bottom: 15px; text-transform: uppercase; }
-        .ranking-table td { padding: 15px 0; border-bottom: 1px solid #1a1a1a; }
-        .rank-num { font-weight: 900; color: var(--gold); width: 40px; }
-        .user-info { display: flex; align-items: center; gap: 10px; font-weight: 600; }
-        .user-info img { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--gold); }
-
-        /* PANEL LATERAL */
-        .points-panel {
-            background: var(--gold-gradient); color: black; padding: 30px;
-            border-radius: 10px; text-align: center; margin-bottom: 25px;
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
         }
-        .points-panel h3 { font-size: 0.7rem; font-weight: 900; letter-spacing: 1px; margin-bottom: 10px; }
-        .current-pts { font-size: 3.5rem; font-weight: 900; line-height: 1; }
+
+        .ranking-table th {
+            text-align: left;
+            color: var(--text-dim);
+            font-size: 0.7rem;
+            padding-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .ranking-table td {
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .rank-num {
+            font-family: 'Syncopate';
+            font-weight: bold;
+            color: var(--text-dim);
+            width: 50px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+        }
+
+        .user-info img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            object-fit: cover;
+        }
+
+        /* PANELES LATERALES */
+        .points-panel {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
+        }
+
+        .points-panel h3 {
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+
+        .current-pts {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: #fff;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
 
         /* RECOMPENSAS */
-        .rewards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
-        .reward-card { 
-            background: #080808; border: 1px solid #222; padding: 20px 10px; 
-            border-radius: 8px; text-align: center; transition: 0.3s; cursor: pointer;
+        .rewards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 15px;
         }
-        .reward-card:hover { border-color: var(--gold); transform: translateY(-5px); }
-        .reward-icon { font-size: 1.5rem; margin-bottom: 10px; display: block; }
-        .reward-cost { color: var(--gold); font-weight: 900; font-size: 0.8rem; display: block; margin-top: 5px; }
 
-        /* LOGIN OVERLAY */
-        .login-overlay {
-            text-align: center; padding: 40px; background: #0a0a0a; border: 1px dashed #333; border-radius: 10px;
+        .reward-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 20px 10px;
+            text-align: center;
+            border-radius: 12px;
+            transition: all 0.3s ease;
         }
-        .btn-auth {
-            background: var(--gold-gradient); color: black; border: none; padding: 15px 30px;
-            font-weight: 900; border-radius: 5px; cursor: pointer; margin-top: 20px; font-family: 'Syncopate';
+
+        .reward-card:hover {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .reward-icon { font-size: 1.8rem; display: block; margin-bottom: 10px; }
+        .reward-cost { color: var(--gold); font-weight: 800; font-size: 0.7rem; margin-top: 8px; display: block; }
+
+        /* BOTONES */
+        .btn-kick {
+            background: var(--gold-gradient);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-kick:hover {
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            transform: scale(1.05);
+        }
+
+        .login-overlay {
+            text-align: center;
+            padding: 40px;
+            background: #111;
+            border-radius: 16px;
+            border: 1px dashed #333;
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <a href="#" class="logo">GARGOLAS <span>COMMUNITY</span></a>
-        <div id="nav-auth">
-            <a href="https://kick.com/mauroakd" target="_blank" class="btn-kick">KICK LIVE</a>
-        </div>
-    </nav>
-
-    <header class="hero">
-        <div class="hero-content">
-            <h1 class="main-title">GARGOLAS</h1>
-            <p class="sub-title">Comunidad MauroAKD</p>
-        </div>
-    </header>
-
-    <div class="container">
-        <section class="section-box">
-            <div class="gold-label"><h2>TOP WATCHTIME</h2></div>
-            <table class="ranking-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Gárgola</th>
-                        <th>Puntos</th>
-                    </tr>
-                </thead>
-                <tbody id="ranking-body">
-                    </tbody>
-            </table>
-        </section>
-
-        <aside>
-            <div id="user-view" style="display: none;">
-                <div class="points-panel">
-                    <h3>MIS PUNTOS GÁRGOLA</h3>
-                    <div class="current-pts" id="user-points">0</div>
-                    <p style="font-size: 0.6rem; font-weight: 900; margin-top: 10px; opacity: 0.7;">VINCULADO CON KICK/DISCORD</p>
-                </div>
-
-                <div class="section-box">
-                    <div class="gold-label"><h3>RECOMPENSAS</h3></div>
-                    <div class="rewards-grid">
-                        <div class="reward-card">
-                            <span class="reward-icon">🎟️</span>
-                            <span style="font-size: 0.7rem; font-weight: 700;">UNBAN</span>
-                            <span class="reward-cost">5.000 pts</span>
-                        </div>
-                        <div class="reward-card">
-                            <span class="reward-icon">👑</span>
-                            <span style="font-size: 0.7rem; font-weight: 700;">VIP SEMANA</span>
-                            <span class="reward-cost">15.000 pts</span>
-                        </div>
-                        <div class="reward-card">
-                            <span class="reward-icon">🎮</span>
-                            <span style="font-size: 0.7rem; font-weight: 700;">ELEGIR JUEGO</span>
-                            <span class="reward-cost">10.000 pts</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="guest-view" class="login-overlay">
-                <h3 style="font-family: 'Syncopate'; font-size: 0.9rem; color: var(--gold);">ACCESO RESTRINGIDO</h3>
-                <p style="font-size: 0.8rem; color: #555; margin-top: 10px;">Víncula tu cuenta para empezar a sumar watchtime y canjear premios.</p>
-                <button onclick="login()" class="btn-auth">VINCULAR AHORA</button>
-            </div>
-        </aside>
+<nav class="navbar">
+    <a href="#" class="logo">GARGOLAS <span>COMMUNITY</span></a>
+    <div id="nav-auth">
+        <button class="btn-kick" onclick="startKickLogin()">Iniciar sesión con Kick</button>
     </div>
+</nav>
 
-    <script>
-        // CONFIGURACIÓN FIREBASE
-        const firebaseConfig = {
-            apiKey: "AIzaSyDC3QHg-JU00vHEx2V6VHHW__O4Fzm5NEk",
-            authDomain: "gargolascommunity.firebaseapp.com",
-            projectId: "gargolascommunity",
-            storageBucket: "gargolascommunity.firebasestorage.app",
-            messagingSenderId: "462233781660",
-            appId: "1:462233781660:web:70a523435c761c692df459"
-        };
+<header class="hero">
+    <div class="hero-content">
+        <h1 class="main-title">GARGOLAS</h1>
+        <p class="sub-title">Comunidad MauroAKD</p>
+    </div>
+</header>
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+<div class="container">
+    <section class="section-box">
+        <div class="gold-label"><h2>TOP WATCHTIME</h2></div>
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Gárgola</th>
+                    <th>Puntos</th>
+                </tr>
+            </thead>
+            <tbody id="ranking-body">
+                </tbody>
+        </table>
+    </section>
 
-        // LOGIN (Discord como puente seguro)
-        function login() {
-            const provider = new firebase.auth.OAuthProvider('discord.com');
-            auth.signInWithPopup(provider).catch(e => console.error(e));
-        }
+    <aside>
+        <div id="user-view" style="display: none;">
+            <div class="points-panel">
+                <h3>MIS PUNTOS GÁRGOLA</h3>
+                <div class="current-pts" id="user-points">0</div>
+                <p style="font-size: 0.5rem; font-weight: 900; margin-top: 15px; opacity: 0.5; letter-spacing: 1px;">STATUS: VINCULADO</p>
+            </div>
 
-        function logout() {
-            auth.signOut().then(() => location.reload());
-        }
-
-        // MANEJO DE USUARIO
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                document.getElementById('guest-view').style.display = 'none';
-                document.getElementById('user-view').style.display = 'block';
-                
-                // Actualizar Navbar
-                document.getElementById('nav-auth').innerHTML = `
-                    <div style="display:flex; align-items:center; gap:15px;">
-                        <img src="${user.photoURL}" width="35" style="border-radius:50%; border:1px solid var(--gold)">
-                        <button onclick="logout()" style="background:none; border:none; color:#555; cursor:pointer; font-weight:bold;">SALIR</button>
-                        <a href="https://kick.com/mauroakd" target="_blank" class="btn-kick">KICK LIVE</a>
+            <div class="section-box">
+                <div class="gold-label"><h2>CANJES</h2></div>
+                <div class="rewards-grid">
+                    <div class="reward-card">
+                        <span class="reward-icon">🎟️</span>
+                        <span style="font-size: 0.6rem; font-weight: 700;">UNBAN</span>
+                        <span class="reward-cost">5.000</span>
                     </div>
-                `;
+                    <div class="reward-card">
+                        <span class="reward-icon">👑</span>
+                        <span style="font-size: 0.6rem; font-weight: 700;">VIP</span>
+                        <span class="reward-cost">15.000</span>
+                    </div>
+                    <div class="reward-card">
+                        <span class="reward-icon">🎮</span>
+                        <span style="font-size: 0.6rem; font-weight: 700;">GAME</span>
+                        <span class="reward-cost">10.000</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                // Inicializar en Firestore
-                const userRef = db.collection('gargolas').doc(user.uid);
-                const doc = await userRef.get();
-                if (!doc.exists) {
-                    await userRef.set({ nombre: user.displayName, puntos: 100, avatar: user.photoURL });
-                }
+        <div id="guest-view" class="login-overlay">
+            <h3 style="font-family: 'Syncopate'; font-size: 0.8rem; color: var(--gold);">ACCESO RESTRINGIDO</h3>
+            <p style="font-size: 0.75rem; color: #666; margin: 20px 0;">Víncula tu cuenta para sumar puntos por ver el stream.</p>
+            <button onclick="startKickLogin()" class="btn-kick">VINCULAR KICK</button>
+        </div>
+    </aside>
+</div>
 
-                // Escuchar puntos
-                userRef.onSnapshot(snap => {
-                    if(snap.exists) document.getElementById('user-points').innerText = snap.data().puntos.toLocaleString();
-                });
-            }
-        });
+<script>
+    // CONFIGURACIÓN FIREBASE
+    const firebaseConfig = {
+        apiKey: "AIzaSyDC3QHg-JU00vHEx2V6VHHW__O4Fzm5NEk",
+        authDomain: "gargolascommunity.firebaseapp.com",
+        projectId: "gargolascommunity",
+        storageBucket: "gargolascommunity.firebasestorage.app",
+        messagingSenderId: "462233781660",
+        appId: "1:462233781660:a523435c761c692df459"
+    };
 
-        // CARGAR RANKING REAL
-        db.collection('gargolas').orderBy('puntos', 'desc').limit(10).onSnapshot(snap => {
-            const tbody = document.getElementById('ranking-body');
-            tbody.innerHTML = '';
-            snap.docs.forEach((doc, i) => {
-                const data = doc.data();
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="rank-num">${i + 1}</td>
-                        <td>
-                            <div class="user-info">
-                                <img src="${data.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed='+data.nombre}">
-                                ${data.nombre}
-                            </div>
-                        </td>
-                        <td style="color: var(--gold); font-weight: bold;">${data.puntos.toLocaleString()}</td>
-                    </tr>
-                `;
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    function startKickLogin() {
+        window.location.href = '/auth/kick'; // Tu ruta de backend
+    }
+
+    function logout() {
+        auth.signOut().then(() => location.reload());
+    }
+
+    // MANEJO DE SESIÓN
+    auth.onAuthStateChanged(user => {
+        const gView = document.getElementById('guest-view');
+        const uView = document.getElementById('user-view');
+        const navA = document.getElementById('nav-auth');
+
+        if (user) {
+            gView.style.display = 'none';
+            uView.style.display = 'block';
+            navA.innerHTML = `
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <img src="${user.photoURL || ''}" width="35" height="35" style="border-radius:50%; border:1px solid var(--gold)">
+                    <button onclick="logout()" style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:0.6rem; font-weight:bold;">LOGOUT</button>
+                </div>`;
+
+            db.collection('gargolas').doc(user.uid).onSnapshot(snap => {
+                if(snap.exists) document.getElementById('user-points').innerText = snap.data().puntos.toLocaleString();
             });
+        } else {
+            gView.style.display = 'block';
+            uView.style.display = 'none';
+        }
+    });
+
+    // RANKING
+    db.collection('gargolas').orderBy('puntos', 'desc').limit(10).onSnapshot(snap => {
+        const tbody = document.getElementById('ranking-body');
+        tbody.innerHTML = '';
+        snap.docs.forEach((doc, i) => {
+            const d = doc.data();
+            const row = `
+                <tr>
+                    <td class="rank-num">#${i + 1}</td>
+                    <td>
+                        <div class="user-info">
+                            <img src="${d.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed='+d.nombre}">
+                            ${d.nombre || 'Gárgola'}
+                        </div>
+                    </td>
+                    <td style="color: var(--gold); font-weight: 900;">${(d.puntos || 0).toLocaleString()}</td>
+                </tr>`;
+            tbody.innerHTML += row;
         });
-    </script>
+    });
+</script>
+
 </body>
 </html>
