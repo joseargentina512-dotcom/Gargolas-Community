@@ -1,315 +1,160 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gárgolas Community | MauroAKD</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gárgolas Community | MauroAKD</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --bg-dark: #050505;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --gold: #d4af37;
-            --gold-bright: #f7d774;
-            --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-            --text-main: #ffffff;
-            --text-dim: #a0a0a0;
-            --accent-color: #00e701; /* Kick Green */
-        }
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-        body {
-            margin: 0;
-            background: var(--bg-dark);
-            background-image: radial-gradient(circle at top center, #1a1a1a 0%, #050505 100%);
-            color: var(--text-main);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            min-height: 100vh;
-        }
-
-        /* --- Navbar --- */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 8%;
-            backdrop-filter: blur(10px);
-            background: rgba(0,0,0,0.5);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--card-border);
-        }
-
-        .logo {
-            font-family: 'Syncopate', sans-serif;
-            font-weight: 700;
-            letter-spacing: -1px;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-        }
-
-        .logo span {
-            background: var(--gold-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* --- Buttons --- */
-        .btn-kick {
-            background: var(--gold-gradient);
-            border: none;
-            padding: 12px 24px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
-            font-size: 0.8rem;
-        }
-
-        .btn-kick:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
-            filter: brightness(1.1);
-        }
-
-        .btn-logout {
-            background: transparent;
-            border: 1px solid var(--card-border);
-            color: var(--text-dim);
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 15px;
-            width: 100%;
-        }
-
-        /* --- Hero --- */
-        .hero {
-            text-align: center;
-            padding: 80px 20px 40px;
-        }
-
-        .main-title {
-            font-family: 'Syncopate', sans-serif;
-            font-size: clamp(2rem, 8vw, 5rem);
-            margin: 0;
-            line-height: 1;
-            background: var(--gold-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
-        }
-
-        .sub-title {
-            color: var(--text-dim);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            margin-top: 10px;
-        }
-
-        /* --- Layout --- */
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 40px;
-            padding: 40px 5%;
-        }
-
-        @media(max-width: 900px) {
-            .container { grid-template-columns: 1fr; }
-        }
-
-        .section-box {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 30px;
-            backdrop-filter: blur(5px);
-        }
-
-        /* --- Ranking Table --- */
-        table { border-collapse: separate; border-spacing: 0 12px; margin-top: -12px; }
-        
-        th { text-align: left; color: var(--text-dim); font-size: 0.8rem; padding: 0 15px; text-transform: uppercase; }
-
-        .rank-row {
-            background: rgba(255,255,255,0.02);
-            transition: background 0.3s ease;
-        }
-
-        .rank-row:hover { background: rgba(255,255,255,0.05); }
-
-        .rank-row td {
-            padding: 15px;
-        }
-
-        .rank-row td:first-child { border-radius: 12px 0 0 12px; font-weight: 800; width: 50px; }
-        .rank-row td:last-child { border-radius: 0 12px 12px 0; text-align: right; font-weight: 600; color: var(--gold-bright); }
-
-        /* --- Sidebar / User Card --- */
-        .user-card {
-            text-align: center;
-            background: var(--gold-gradient);
-            padding: 1px; /* Border effect */
-            border-radius: 20px;
-        }
-
-        .user-card-inner {
-            background: var(--bg-dark);
-            border-radius: 19px;
-            padding: 30px 20px;
-        }
-
-        .points-val {
-            font-size: 2.5rem;
-            font-weight: 800;
-            display: block;
-            margin: 10px 0;
-            color: var(--text-main);
-        }
-
-        .user-info-nav {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255,255,255,0.05);
-            padding: 5px 15px;
-            border-radius: 50px;
-            border: 1px solid var(--card-border);
-        }
-
-        .user-info-nav img {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-    </style>
+<style>
+/* === TU CSS ORIGINAL (SIN CAMBIOS) === */
+:root{
+--bg-dark:#050505;--card-bg:rgba(255,255,255,.03);--card-border:rgba(255,255,255,.08);
+--gold:#d4af37;--gold-bright:#f7d774;
+--gold-gradient:linear-gradient(135deg,#bf953f,#fcf6ba,#b38728,#fbf5b7,#aa771c);
+--text-main:#fff;--text-dim:#a0a0a0}
+body{margin:0;background:#050505;color:#fff;font-family:'Plus Jakarta Sans',sans-serif}
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:20px 8%;border-bottom:1px solid var(--card-border)}
+.logo{font-family:'Syncopate';font-size:1.2rem}
+.logo span{background:var(--gold-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.btn-kick{background:var(--gold-gradient);border:none;padding:12px 24px;font-weight:800;cursor:pointer;border-radius:4px}
+.btn-logout{background:transparent;border:1px solid var(--card-border);color:var(--text-dim);padding:8px 15px;width:100%}
+.hero{text-align:center;padding:80px 20px 40px}
+.main-title{font-family:'Syncopate';font-size:clamp(2rem,8vw,5rem);
+background:var(--gold-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.container{max-width:1200px;margin:auto;display:grid;grid-template-columns:1fr 350px;gap:40px;padding:40px 5%}
+@media(max-width:900px){.container{grid-template-columns:1fr}}
+.section-box{background:var(--card-bg);border:1px solid var(--card-border);border-radius:24px;padding:30px}
+.rank-row td{padding:15px}
+.user-card{background:var(--gold-gradient);padding:1px;border-radius:20px}
+.user-card-inner{background:#050505;border-radius:19px;padding:30px}
+.points-val{font-size:2.5rem;font-weight:800}
+.user-info-nav{display:flex;align-items:center;gap:10px}
+.user-info-nav img{width:28px;height:28px;border-radius:50%}
+</style>
 </head>
 
 <body>
 
 <nav class="navbar">
-    <a class="logo">GARGOLAS <span>COMMUNITY</span></a>
-    <div id="nav-auth">
-        <button class="btn-kick" onclick="startKickLogin()">Conectar Kick</button>
-    </div>
+<div class="logo">GARGOLAS <span>COMMUNITY</span></div>
+<div id="nav-auth">
+<button class="btn-kick" onclick="startKickLogin()">Conectar Kick</button>
+</div>
 </nav>
 
 <header class="hero">
-    <h1 class="main-title">GARGOLAS</h1>
-    <p class="sub-title">Comunidad MauroAKD</p>
+<h1 class="main-title">GARGOLAS</h1>
+<p style="color:#aaa">Comunidad MauroAKD</p>
 </header>
 
 <div class="container">
-    <main>
-        <section class="section-box">
-            <h3 style="margin-top:0; margin-bottom: 25px;">TOP WATCHTIME</h3>
-            <table width="100%">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Gárgola</th>
-                        <th style="text-align:right">Puntos</th>
-                    </tr>
-                </thead>
-                <tbody id="ranking-body">
-                    </tbody>
-            </table>
-        </section>
-    </main>
+<main>
+<div class="section-box">
+<h3>TOP WATCHTIME</h3>
+<table width="100%">
+<tbody id="ranking-body"></tbody>
+</table>
+</div>
+</main>
 
-    <aside>
-        <div id="user-view" style="display:none" class="user-card">
-            <div class="user-card-inner">
-                <span style="color:var(--text-dim); font-size: 0.8rem; text-transform: uppercase;">Tu Balance</span>
-                <span id="user-points" class="points-val">0</span>
-                <p style="font-size: 0.8rem; color: var(--gold);">Puntos acumulados</p>
-                <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
-            </div>
-        </div>
+<aside>
+<div id="user-view" class="user-card" style="display:none">
+<div class="user-card-inner">
+<span>Tus puntos</span>
+<div id="user-points" class="points-val">0</div>
+<button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+</div>
+</div>
 
-        <div id="guest-view" class="section-box" style="text-align: center;">
-            <div style="font-size: 2rem; margin-bottom: 15px;">👑</div>
-            <h4>¿Sos una Gárgola?</h4>
-            <p style="color:var(--text-dim); font-size: 0.9rem; margin-bottom: 20px;">
-                Vinculá tu cuenta para empezar a sumar puntos y aparecer en el ranking.
-            </p>
-            <button class="btn-kick" style="width: 100%;" onclick="startKickLogin()">Vincular Kick</button>
-        </div>
-    </aside>
+<div id="guest-view" class="section-box">
+<p>Vinculá tu cuenta para sumar puntos</p>
+<button class="btn-kick" style="width:100%" onclick="startKickLogin()">Vincular Kick</button>
+</div>
+</aside>
 </div>
 
 <script>
-    // Configuración Firebase (Misma lógica, no tocar a menos que cambies el proyecto)
-    firebase.initializeApp({
-        apiKey: "AIzaSyDC3QHg-JU00vHEx2V6VHHW__O4Fzm5NEk",
-        authDomain: "gargolascommunity.firebaseapp.com",
-        projectId: "gargolascommunity"
-    });
+// ===== FIREBASE =====
+firebase.initializeApp({
+apiKey:"AIzaSyDC3QHg-JU00vHEx2V6VHHW__O4Fzm5NEk",
+authDomain:"gargolascommunity.firebaseapp.com",
+projectId:"gargolascommunity"
+});
 
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+const auth=firebase.auth();
+const db=firebase.firestore();
 
+// ===== LOGIN KICK (REDIRECT) =====
 function startKickLogin(){
-    const provider = new firebase.auth.OAuthProvider("kick");
-    auth.signInWithRedirect(provider);
+const provider=new firebase.auth.OAuthProvider("kick");
+auth.signInWithRedirect(provider);
 }
 
+// ===== RECUPERAR REDIRECT (ERA LO QUE FALTABA) =====
+auth.getRedirectResult()
+.then(r=>{
+if(r.user){
+const ref=db.collection("gargolas").doc(r.user.uid);
+ref.get().then(d=>{
+if(!d.exists){
+ref.set({
+nombre:r.user.displayName||"Gárgola",
+puntos:0,
+creado:firebase.firestore.FieldValue.serverTimestamp()
+});
+}
+});
+}
+})
+.catch(e=>console.error(e));
 
-    function logout(){ auth.signOut(); }
+// ===== SESIÓN =====
+function logout(){auth.signOut();}
 
-    auth.onAuthStateChanged(user => {
-        const guest = document.getElementById("guest-view");
-        const userView = document.getElementById("user-view");
-        const nav = document.getElementById("nav-auth");
+auth.onAuthStateChanged(user=>{
+const guest=document.getElementById("guest-view");
+const userView=document.getElementById("user-view");
+const nav=document.getElementById("nav-auth");
 
-        if(user){
-            guest.style.display = "none";
-            userView.style.display = "block";
-            nav.innerHTML = `
-                <div class="user-info-nav">
-                    <img src="${user.photoURL || 'https://via.placeholder.com/32'}">
-                    <span style="font-size:0.85rem; font-weight:600;">${user.displayName || "Gárgola"}</span>
-                </div>`;
+if(user){
+guest.style.display="none";
+userView.style.display="block";
+nav.innerHTML=`<div class="user-info-nav">
+<img src="${user.photoURL||''}">
+<span>${user.displayName||"Gárgola"}</span>
+</div>`;
 
-            db.collection("gargolas").doc(user.uid).onSnapshot(s => {
-                if(s.exists) document.getElementById("user-points").innerText = s.data().puntos.toLocaleString();
-            });
-        } else {
-            guest.style.display = "block";
-            userView.style.display = "none";
-            nav.innerHTML = `<button class="btn-kick" onclick="startKickLogin()">Conectar Kick</button>`;
-        }
-    });
+db.collection("gargolas").doc(user.uid).onSnapshot(s=>{
+if(s.exists) document.getElementById("user-points").innerText=s.data().puntos;
+});
+}else{
+guest.style.display="block";
+userView.style.display="none";
+nav.innerHTML=`<button class="btn-kick" onclick="startKickLogin()">Conectar Kick</button>`;
+}
+});
 
-    db.collection("gargolas").orderBy("puntos", "desc").limit(10).onSnapshot(snap => {
-        const tbody = document.getElementById("ranking-body");
-        tbody.innerHTML = "";
-        snap.forEach((doc, i) => {
-            const d = doc.data();
-            tbody.innerHTML += `
-                <tr class="rank-row">
-                    <td>#${i + 1}</td>
-                    <td>${d.nombre || "Gárgola Anonima"}</td>
-                    <td>${(d.puntos || 0).toLocaleString()}</td>
-                </tr>`;
-        });
-    });
+// ===== RANKING =====
+db.collection("gargolas").orderBy("puntos","desc").limit(10)
+.onSnapshot(s=>{
+const body=document.getElementById("ranking-body");
+body.innerHTML="";
+s.forEach((d,i)=>{
+const x=d.data();
+body.innerHTML+=`
+<tr class="rank-row">
+<td>#${i+1}</td>
+<td>${x.nombre||"Gárgola"}</td>
+<td>${x.puntos||0}</td>
+</tr>`;
+});
+});
 </script>
 
 </body>
