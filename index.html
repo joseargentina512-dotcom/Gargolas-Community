@@ -12,7 +12,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-/* === TODO TU CSS ORIGINAL (SIN CAMBIOS) === */
 :root {
     --bg-dark:#050505;
     --gold-main:#d4af37;
@@ -20,14 +19,50 @@
     --card-bg:rgba(255,255,255,0.02);
     --card-border:rgba(212,175,55,0.12);
 }
+
+/* ===== GLOBAL ===== */
 body {
     margin:0;
-    background-color:var(--bg-dark);
-    background-image:radial-gradient(circle at 50% 30%,rgba(184,134,11,0.12) 0%,transparent 60%);
-    background-attachment:fixed;
+    background:var(--bg-dark);
     color:#fff;
     font-family:'Plus Jakarta Sans',sans-serif;
+    overflow-x:hidden;
 }
+
+/* ===== FONDO GÁRGOLAS ===== */
+.gargoyle-bg {
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    pointer-events:none;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(212,175,55,0.08), transparent 40%),
+        radial-gradient(circle at 80% 60%, rgba(212,175,55,0.06), transparent 45%);
+}
+
+.gargoyle-bg::before,
+.gargoyle-bg::after {
+    content:"🗿";
+    position:absolute;
+    font-size:160px;
+    opacity:0.04;
+    animation:floatGargoyle 30s linear infinite;
+}
+
+.gargoyle-bg::after {
+    font-size:220px;
+    left:70%;
+    top:60%;
+    animation-duration:45s;
+}
+
+@keyframes floatGargoyle {
+    0% { transform:translateY(0) translateX(0) rotate(0deg); }
+    50% { transform:translateY(-140px) translateX(50px) rotate(5deg); }
+    100% { transform:translateY(0) translateX(0) rotate(0deg); }
+}
+
+/* ===== SHIMMER TITLE ===== */
 .shimmer-title {
     font-family:'Syncopate';
     font-size:clamp(2.5rem,8vw,5rem);
@@ -37,13 +72,29 @@ body {
     -webkit-text-fill-color:transparent;
     animation:shine 3s linear infinite;
 }
+
 @keyframes shine { to { background-position:200% center } }
+
+/* ===== NAV ===== */
 .navbar {
     display:flex;
     justify-content:space-between;
+    align-items:center;
     padding:20px 8%;
     border-bottom:1px solid var(--card-border);
+    backdrop-filter:blur(10px);
 }
+
+.logo {
+    font-family:'Syncopate';
+    letter-spacing:1px;
+}
+.logo span {
+    background:var(--gold-gradient);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
 .btn-kick {
     background:var(--gold-gradient);
     border:none;
@@ -51,7 +102,11 @@ body {
     font-weight:800;
     border-radius:6px;
     cursor:pointer;
+    transition:.3s;
 }
+.btn-kick:hover { transform:scale(1.05); }
+
+/* ===== LAYOUT ===== */
 .container {
     max-width:1200px;
     margin:auto;
@@ -60,12 +115,66 @@ body {
     gap:40px;
     padding:40px 5%;
 }
+
 .section-box {
     background:var(--card-bg);
     border:1px solid var(--card-border);
     border-radius:24px;
     padding:30px;
+    backdrop-filter:blur(10px);
+    transition:.4s;
 }
+.section-box:hover {
+    transform:translateY(-6px);
+    box-shadow:0 25px 60px rgba(212,175,55,0.08);
+}
+
+/* ===== FADE ANIM ===== */
+.fade-up {
+    opacity:0;
+    transform:translateY(30px);
+    animation:fadeUp 1s ease forwards;
+}
+@keyframes fadeUp {
+    to { opacity:1; transform:none }
+}
+
+/* ===== RANK ===== */
+.rank-table { width:100%; border-collapse:collapse; }
+.rank-row td { padding:14px 8px; }
+.rank-pos { color:var(--gold-main); font-weight:800; }
+
+/* ===== REWARDS ===== */
+.rewards-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+    gap:15px;
+}
+.reward-item-new {
+    position:relative;
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    padding:20px 10px;
+    text-align:center;
+    transition:.3s;
+}
+.reward-item-new:hover { transform:scale(1.05); }
+
+.lock-overlay {
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:rgba(0,0,0,.4);
+    backdrop-filter:blur(4px);
+    animation:pulseLock 2.5s infinite;
+}
+@keyframes pulseLock {
+    0%,100%{opacity:.7}50%{opacity:1}
+}
+
+/* ===== SIDEBAR ===== */
 .points-val {
     font-size:3.5rem;
     font-weight:800;
@@ -73,32 +182,49 @@ body {
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 }
+
+@media(max-width:900px){
+    .container{grid-template-columns:1fr}
+}
 </style>
 </head>
 
 <body>
 
-<nav class="navbar">
+<div class="gargoyle-bg"></div>
+
+<nav class="navbar fade-up">
     <div class="logo">GARGOLAS <span>COMMUNITY</span></div>
     <div id="nav-auth">
         <button class="btn-kick" onclick="loginKick()">Conectar Kick</button>
     </div>
 </nav>
 
-<header style="text-align:center;padding:80px 20px">
+<header class="fade-up" style="text-align:center;padding:80px 20px;animation-delay:.2s">
     <h1 class="shimmer-title">GARGOLAS</h1>
-    <p style="color:#555;letter-spacing:5px">Comunidad MauroAKD</p>
+    <p style="color:#666;letter-spacing:5px">Comunidad MauroAKD</p>
 </header>
 
 <div class="container">
-<main>
+<main class="fade-up" style="animation-delay:.4s">
     <div class="section-box">
-        <h3>TOP WATCHTIME</h3>
-        <table><tbody id="ranking-body"></tbody></table>
+        <h3 style="color:var(--gold-main)">TOP WATCHTIME</h3>
+        <table class="rank-table">
+            <tbody id="ranking-body"></tbody>
+        </table>
+    </div>
+
+    <div class="section-box" style="margin-top:30px">
+        <h3 style="color:var(--gold-main)">RECOMPENSAS</h3>
+        <div class="rewards-grid">
+            <div class="reward-item-new"><div class="lock-overlay">🔒 1K</div>💎 VIP</div>
+            <div class="reward-item-new"><div class="lock-overlay">🔒 5K</div>🎮 DUO</div>
+            <div class="reward-item-new"><div class="lock-overlay">🔒 10K</div>🔥 UNBAN</div>
+        </div>
     </div>
 </main>
 
-<aside>
+<aside class="fade-up" style="animation-delay:.6s">
     <div id="user-view" class="section-box" style="display:none">
         <small>MIS PUNTOS</small>
         <div id="user-points" class="points-val">0</div>
@@ -106,14 +232,13 @@ body {
     </div>
 
     <div id="guest-view" class="section-box">
-        <p>Logueate para sumar puntos</p>
+        <p style="color:#888">Logueate para sumar puntos</p>
         <button class="btn-kick" onclick="loginKick()">Vincular Kick</button>
     </div>
 </aside>
 </div>
 
 <script>
-/* ========= FIREBASE ========= */
 firebase.initializeApp({
   apiKey: "TU_API_KEY",
   authDomain: "gargolascommunity.firebaseapp.com",
@@ -123,12 +248,10 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* ========= LOGIN KICK ========= */
 function loginKick() {
   window.location.href = "https://gargolas-backend.onrender.com/auth/kick";
 }
 
-/* ========= TOKEN DESDE BACKEND ========= */
 const params = new URLSearchParams(window.location.search);
 const token = params.get("token");
 
@@ -137,27 +260,22 @@ if (token) {
     .then(() => window.history.replaceState({}, document.title, "/"));
 }
 
-/* ========= AUTH STATE ========= */
 auth.onAuthStateChanged(user => {
   const gv = document.getElementById("guest-view");
   const uv = document.getElementById("user-view");
-
   if (!user) {
-    gv.style.display = "block";
-    uv.style.display = "none";
-    return;
+    gv.style.display="block"; uv.style.display="none"; return;
   }
-
-  gv.style.display = "none";
-  uv.style.display = "block";
+  gv.style.display="none"; uv.style.display="block";
 
   const ref = db.collection("gargolas").doc(user.uid);
-  ref.set({ puntos: 0 }, { merge: true });
+  ref.set({ puntos:0 }, { merge:true });
 
-  ref.onSnapshot(s => {
-    if (s.exists) {
-      document.getElementById("user-points").innerText =
-        s.data().puntos.toLocaleString();
+  ref.onSnapshot(s=>{
+    if(s.exists){
+      const el=document.getElementById("user-points");
+      el.animate([{transform:"scale(1)"},{transform:"scale(1.15)"},{transform:"scale(1)"}],{duration:400});
+      el.innerText=s.data().puntos.toLocaleString();
     }
   });
 });
