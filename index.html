@@ -103,6 +103,7 @@ body {
     border-radius:6px;
     cursor:pointer;
     transition:.3s;
+    color: #000;
 }
 .btn-kick:hover { transform:scale(1.05); }
 
@@ -139,12 +140,51 @@ body {
     to { opacity:1; transform:none }
 }
 
-/* ===== RANK ===== */
-.rank-table { width:100%; border-collapse:collapse; }
-.rank-row td { padding:14px 8px; }
-.rank-pos { color:var(--gold-main); font-weight:800; }
+/* ===== RANK TABLE ===== */
+.rank-table {
+    width:100%;
+    border-collapse:collapse;
+    margin-top: 20px;
+}
 
-/* ===== RECOMPENSAS (AGRANDADAS) ===== */
+.rank-row {
+    border-bottom: 1px solid var(--card-border);
+    transition: 0.3s;
+}
+
+.rank-row:hover {
+    background: rgba(212,175,55,0.08);
+}
+
+.rank-row td {
+    padding:16px 12px;
+    text-align: left;
+}
+
+.rank-pos {
+    color:var(--gold-main);
+    font-weight:800;
+    font-size: 1.2rem;
+    width: 40px;
+}
+
+.rank-username {
+    font-weight: 600;
+}
+
+.rank-time {
+    color: #aaa;
+    text-align: right;
+}
+
+.status-live {
+    color: #4ade80;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* ===== RECOMPENSAS ===== */
 .rewards-grid {
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
@@ -211,6 +251,16 @@ body {
 @media(max-width:900px){
     .container{grid-template-columns:1fr}
 }
+
+/* Animación de actualización */
+@keyframes updateGlow {
+    0% { box-shadow: 0 0 0 rgba(212,175,55,0.5); }
+    100% { box-shadow: 0 0 20px rgba(212,175,55,0.2); }
+}
+
+.updating {
+    animation: updateGlow 0.6s ease;
+}
 </style>
 </head>
 
@@ -231,9 +281,13 @@ body {
 <div class="container">
 <main class="fade-up" style="animation-delay:.4s">
     <div class="section-box">
-        <h3 style="color:var(--gold-main)">TOP WATCHTIME</h3>
-        <table class="rank-table">
-            <tbody id="ranking-body"></tbody>
+        <h3 style="color:var(--gold-main)">TOP WATCHTIME ⏱️</h3>
+        <table class="rank-table" id="watchtime-table">
+            <tbody id="watchtime-body">
+                <tr>
+                    <td colspan="3" style="text-align:center; color:#666;">Cargando ranking...</td>
+                </tr>
+            </tbody>
         </table>
     </div>
 
@@ -260,7 +314,8 @@ body {
     <div id="user-view" class="section-box" style="display:none">
         <small>MIS PUNTOS</small>
         <div id="user-points" class="points-val">0</div>
-        <button onclick="auth.signOut()">Cerrar sesión</button>
+        <small style="color:#666; margin-top: 20px; display:block;" id="user-watchtime">Watchtime: 0h 0m</small>
+        <button class="btn-kick" onclick="auth.signOut()" style="margin-top:20px; width:100%">Cerrar sesión</button>
     </div>
 
     <div id="guest-view" class="section-box">
@@ -280,8 +335,10 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+const BACKEND_URL = "https://gargolas-backend.onrender.com";
+
 function loginKick() {
-  window.location.href = "https://gargolas-backend.onrender.com/auth/kick";
+  window.location.href = BACKEND_URL + "/auth/kick";
 }
 
 const params = new URLSearchParams(window.location.search);
@@ -292,22 +349,128 @@ if (token) {
     .then(() => window.history.replaceState({}, document.title, "/"));
 }
 
-auth.onAuthStateChanged(user => {
+// ============= CARGAR TOP WATCHTIME =============
+async function loadTopWatchtime() {
+  try {
+    const response = await fetch(BACKEND_URL + "/api/top-watchtime");
+    const topWatchtime = await response.json();
+    
+    const tbody = document.getElementById("watchtime-body");
+    tbody.innerHTML = "";
+
+    if (topWatchtime.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#666;">Sin datos aún</td></tr>';
+      return;
+    }
+
+    topWatchtime.forEach((user, idx) => {
+      const row = document.createElement("tr");
+      row.className = "rank-row";
+      
+      const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : (idx + 1);
+      const statusBadge = user.isWatching ? '<span class="status-live">🔴 LIVE</span>' : '';
+      
+      row.innerHTML = `
+        <td class="rank-pos">${medal}</td>
+        <td class="rank-username">${user.username} ${statusBadge}</td>
+        <td class="rank-time">${user.watchTimeHours}h ${user.watchTimeMinutes}m</td>
+      `;
+      
+      tbody.appendChild(row);
+    });
+
+    // Animar actualización
+    const table = document.getElementById("watchtime-table");
+    table.classList.add("updating");
+    setTimeout(() => table.classList.remove("updating"), 600);
+
+  } catch (error) {
+    console.error("Error cargando top watchtime:", error);
+  }
+}
+
+// Cargar al abrir página
+loadTopWatchtime();
+
+// Actualizar cada 30 segundos
+setInterval(loadTopWatchtime, 30000);
+
+// ============= AUTH STATE =============
+auth.onAuthStateChanged(async user => {
   const gv = document.getElementById("guest-view");
   const uv = document.getElementById("user-view");
+  
   if (!user) {
-    gv.style.display="block"; uv.style.display="none"; return;
+    gv.style.display="block"; 
+    uv.style.display="none"; 
+    return;
   }
-  gv.style.display="none"; uv.style.display="block";
 
-  const ref = db.collection("gargolas").doc(user.uid);
+  gv.style.display="none"; 
+  uv.style.display="block";
+
+  // Obtener username del custom token
+  const username = user.displayName || user.uid;
+
+  // Guardar usuario en Firestore
+  const ref = db.collection("users").doc(username);
   ref.set({ puntos:0 }, { merge:true });
 
+  // Actualizar puntos en tiempo real
   ref.onSnapshot(s=>{
     if(s.exists){
-      const el=document.getElementById("user-points");
+      const el = document.getElementById("user-points");
       el.animate([{transform:"scale(1)"},{transform:"scale(1.15)"},{transform:"scale(1)"}],{duration:400});
-      el.innerText=s.data().puntos.toLocaleString();
+      el.innerText = (s.data().puntos || 0).toLocaleString();
+    }
+  });
+
+  // Actualizar watchtime
+  const wtRef = db.collection("watchtime").doc(username);
+  wtRef.onSnapshot(s=>{
+    if(s.exists && s.data().totalWatchTime){
+      const seconds = s.data().totalWatchTime;
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      document.getElementById("user-watchtime").innerText = `Watchtime: ${hours}h ${minutes}m`;
+    }
+  });
+
+  // Registrar que está viendo cuando carga la página
+  try {
+    await fetch(BACKEND_URL + "/api/start-watching", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username })
+    });
+    console.log("✅ Usuario registrado como viendo");
+  } catch (error) {
+    console.error("Error registrando usuario:", error);
+  }
+
+  // Mantener actividad cada 20 segundos
+  setInterval(async () => {
+    try {
+      await fetch(BACKEND_URL + "/api/user-activity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username })
+      });
+    } catch (error) {
+      console.error("Error actualizando actividad:", error);
+    }
+  }, 20000);
+
+  // Al cerrar sesión
+  window.addEventListener("beforeunload", async () => {
+    try {
+      await fetch(BACKEND_URL + "/api/stop-watching", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username })
+      });
+    } catch (error) {
+      console.error("Error deteniendo sesión:", error);
     }
   });
 });
