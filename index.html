@@ -12,6 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
+/* ===== TODOS LOS ESTILOS IGUALES ===== */
 :root {
     --bg-dark:#050505;
     --gold-main:#d4af37;
@@ -20,7 +21,6 @@
     --card-border:rgba(212,175,55,0.12);
 }
 
-/* ===== GLOBAL ===== */
 body {
     margin:0;
     background:var(--bg-dark);
@@ -277,7 +277,6 @@ body {
     .container{grid-template-columns:1fr}
 }
 
-/* Animación de actualización */
 @keyframes updateGlow {
     0% { box-shadow: 0 0 0 rgba(212,175,55,0.5); }
     100% { box-shadow: 0 0 20px rgba(212,175,55,0.2); }
@@ -373,12 +372,18 @@ function showMessage(message, type = 'error') {
   }, 5000);
 }
 
+// 🔥 FIX: TIMESTAMP ÚNICO PARA EVITAR CACHE
 function loginKick() {
   const kickBtn = document.getElementById('kickBtn');
+  const guestKickBtn = document.getElementById('guestKickBtn');
+  
   kickBtn.disabled = true;
   kickBtn.textContent = 'Redirigiendo...';
+  guestKickBtn.disabled = true;
   
-  window.location.href = `${BACKEND_URL}/auth/kick`;
+  // TIMESTAMP ÚNICO = NUEVO STATE CADA VEZ
+  const timestamp = Date.now();
+  window.location.href = `${BACKEND_URL}/auth/kick?t=${timestamp}`;
 }
 
 function logout() {
@@ -401,6 +406,8 @@ if (error) {
     case 'user_error': errorMsg = 'Error cargando perfil'; break;
     case 'server_error': errorMsg = 'Error del servidor'; break;
     case 'auth_error': errorMsg = 'Error de autorización'; break;
+    case 'no_code': errorMsg = 'No se recibió código de Kick'; break;
+    case 'invalid_state': errorMsg = 'Sesión expirada, intenta de nuevo'; break;
   }
   showMessage(errorMsg);
   window.history.replaceState({}, document.title, window.location.pathname);
@@ -448,7 +455,6 @@ async function loadTopWatchtime() {
       tbody.appendChild(row);
     });
 
-    // Animar actualización
     const table = document.getElementById("watchtime-table");
     table.classList.add("updating");
     setTimeout(() => table.classList.remove("updating"), 600);
@@ -462,8 +468,6 @@ async function loadTopWatchtime() {
 
 // Cargar al abrir página
 loadTopWatchtime();
-
-// Actualizar cada 30 segundos
 setInterval(loadTopWatchtime, 30000);
 
 // ============= AUTH STATE =============
@@ -479,6 +483,7 @@ auth.onAuthStateChanged(async user => {
     kickBtn.disabled = false;
     kickBtn.textContent = 'Conectar Kick';
     guestKickBtn.disabled = false;
+    guestKickBtn.textContent = 'Vincular Kick';
     return;
   }
 
@@ -486,15 +491,13 @@ auth.onAuthStateChanged(async user => {
   uv.style.display="block";
   kickBtn.disabled = true;
   kickBtn.textContent = 'Conectado ✅';
+  guestKickBtn.disabled = true;
 
-  // Obtener username del custom token
   const username = user.displayName || user.uid.replace('kick_', '');
 
-  // Guardar usuario en Firestore
   const ref = db.collection("users").doc(username);
   ref.set({ puntos:0 }, { merge:true });
 
-  // Actualizar puntos en tiempo real
   ref.onSnapshot(s=>{
     if(s.exists){
       const el = document.getElementById("user-points");
@@ -503,7 +506,6 @@ auth.onAuthStateChanged(async user => {
     }
   });
 
-  // Actualizar watchtime
   const wtRef = db.collection("watchtime").doc(username);
   wtRef.onSnapshot(s=>{
     if(s.exists && s.data().totalWatchTime){
@@ -514,7 +516,6 @@ auth.onAuthStateChanged(async user => {
     }
   });
 
-  // Registrar que está viendo cuando carga la página
   try {
     await fetch(`${BACKEND_URL}/api/start-watching`, {
       method: "POST",
@@ -526,7 +527,6 @@ auth.onAuthStateChanged(async user => {
     console.error("Error registrando usuario:", error);
   }
 
-  // Mantener actividad cada 20 segundos
   const activityInterval = setInterval(async () => {
     if (!auth.currentUser) {
       clearInterval(activityInterval);
@@ -543,7 +543,6 @@ auth.onAuthStateChanged(async user => {
     }
   }, 20000);
 
-  // Cleanup al cerrar pestaña
   window.addEventListener("beforeunload", async () => {
     try {
       await fetch(`${BACKEND_URL}/api/stop-watching`, {
