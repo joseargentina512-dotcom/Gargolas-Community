@@ -106,6 +106,11 @@ body {
     color: #000;
 }
 .btn-kick:hover { transform:scale(1.05); }
+.btn-kick:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
 
 /* ===== LAYOUT ===== */
 .container {
@@ -248,6 +253,26 @@ body {
     -webkit-text-fill-color:transparent;
 }
 
+.error-message {
+    color: #ef4444;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    padding: 15px;
+    border-radius: 12px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.success-message {
+    color: #10b981;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.3);
+    padding: 15px;
+    border-radius: 12px;
+    margin: 20px 0;
+    text-align: center;
+}
+
 @media(max-width:900px){
     .container{grid-template-columns:1fr}
 }
@@ -270,7 +295,7 @@ body {
 
 <nav class="navbar fade-up">
     <div class="logo">GARGOLAS <span>COMMUNITY</span></div>
-    <button class="btn-kick" onclick="loginKick()">Conectar Kick</button>
+    <button class="btn-kick" id="kickBtn" onclick="loginKick()">Conectar Kick</button>
 </nav>
 
 <header class="fade-up" style="text-align:center;padding:80px 20px;animation-delay:.2s">
@@ -280,6 +305,8 @@ body {
 
 <div class="container">
 <main class="fade-up" style="animation-delay:.4s">
+    <div id="errorContainer"></div>
+    
     <div class="section-box">
         <h3 style="color:var(--gold-main)">TOP WATCHTIME ⏱️</h3>
         <table class="rank-table" id="watchtime-table">
@@ -315,50 +342,92 @@ body {
         <small>MIS PUNTOS</small>
         <div id="user-points" class="points-val">0</div>
         <small style="color:#666; margin-top: 20px; display:block;" id="user-watchtime">Watchtime: 0h 0m</small>
-        <button class="btn-kick" onclick="auth.signOut()" style="margin-top:20px; width:100%">Cerrar sesión</button>
+        <button class="btn-kick" onclick="logout()" style="margin-top:20px; width:100%">Cerrar sesión</button>
     </div>
 
     <div id="guest-view" class="section-box">
         <p style="color:#888">Logueate para sumar puntos</p>
-        <button class="btn-kick" onclick="loginKick()">Vincular Kick</button>
+        <button class="btn-kick" id="guestKickBtn" onclick="loginKick()">Vincular Kick</button>
     </div>
 </aside>
 </div>
 
 <script>
-firebase.initializeApp({
-  apiKey: "TU_API_KEY",
+const config = {
+  apiKey: "TU_API_KEY_AQUI", // ← CAMBIA ESTO
   authDomain: "gargolascommunity.firebaseapp.com",
   projectId: "gargolascommunity"
-});
+};
 
+firebase.initializeApp(config);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
 const BACKEND_URL = "https://gargolas-backend.onrender.com";
 
-function loginKick() {
-  window.location.href = BACKEND_URL + "/auth/kick";
+function showMessage(message, type = 'error') {
+  const container = document.getElementById('errorContainer');
+  container.innerHTML = `<div class="${type}-message">${message}</div>`;
+  setTimeout(() => {
+    container.innerHTML = '';
+  }, 5000);
 }
 
+function loginKick() {
+  const kickBtn = document.getElementById('kickBtn');
+  kickBtn.disabled = true;
+  kickBtn.textContent = 'Redirigiendo...';
+  
+  window.location.href = `${BACKEND_URL}/auth/kick`;
+}
+
+function logout() {
+  auth.signOut().then(() => {
+    showMessage('Sesión cerrada correctamente', 'success');
+  });
+}
+
+// Manejar token de callback
 const params = new URLSearchParams(window.location.search);
 const token = params.get("token");
+const error = params.get("error");
+
+if (error) {
+  let errorMsg = 'Error desconocido';
+  switch(error) {
+    case 'kick_denied': errorMsg = 'Acceso denegado en Kick'; break;
+    case 'kick_auth': errorMsg = 'Error de autenticación con Kick'; break;
+    case 'token_error': errorMsg = 'Error obteniendo token'; break;
+    case 'user_error': errorMsg = 'Error cargando perfil'; break;
+    case 'server_error': errorMsg = 'Error del servidor'; break;
+    case 'auth_error': errorMsg = 'Error de autorización'; break;
+  }
+  showMessage(errorMsg);
+  window.history.replaceState({}, document.title, window.location.pathname);
+}
 
 if (token) {
   auth.signInWithCustomToken(token)
-    .then(() => window.history.replaceState({}, document.title, "/"));
+    .then(() => {
+      showMessage('¡Conectado correctamente!', 'success');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    })
+    .catch(err => {
+      console.error('Error Firebase token:', err);
+      showMessage('Error iniciando sesión');
+    });
 }
 
 // ============= CARGAR TOP WATCHTIME =============
 async function loadTopWatchtime() {
   try {
-    const response = await fetch(BACKEND_URL + "/api/top-watchtime");
+    const response = await fetch(`${BACKEND_URL}/api/top-watchtime`);
     const topWatchtime = await response.json();
     
     const tbody = document.getElementById("watchtime-body");
     tbody.innerHTML = "";
 
-    if (topWatchtime.length === 0) {
+    if (topWatchtime.length === 0 || !topWatchtime[0]) {
       tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#666;">Sin datos aún</td></tr>';
       return;
     }
@@ -372,8 +441,8 @@ async function loadTopWatchtime() {
       
       row.innerHTML = `
         <td class="rank-pos">${medal}</td>
-        <td class="rank-username">${user.username} ${statusBadge}</td>
-        <td class="rank-time">${user.watchTimeHours}h ${user.watchTimeMinutes}m</td>
+        <td class="rank-username">${user.username || 'Usuario'} ${statusBadge}</td>
+        <td class="rank-time">${user.watchTimeHours || 0}h ${user.watchTimeMinutes || 0}m</td>
       `;
       
       tbody.appendChild(row);
@@ -386,6 +455,8 @@ async function loadTopWatchtime() {
 
   } catch (error) {
     console.error("Error cargando top watchtime:", error);
+    document.getElementById("watchtime-body").innerHTML = 
+      '<tr><td colspan="3" style="text-align:center; color:#666;">Error cargando datos</td></tr>';
   }
 }
 
@@ -399,18 +470,25 @@ setInterval(loadTopWatchtime, 30000);
 auth.onAuthStateChanged(async user => {
   const gv = document.getElementById("guest-view");
   const uv = document.getElementById("user-view");
+  const kickBtn = document.getElementById('kickBtn');
+  const guestKickBtn = document.getElementById('guestKickBtn');
   
   if (!user) {
     gv.style.display="block"; 
-    uv.style.display="none"; 
+    uv.style.display="none";
+    kickBtn.disabled = false;
+    kickBtn.textContent = 'Conectar Kick';
+    guestKickBtn.disabled = false;
     return;
   }
 
   gv.style.display="none"; 
   uv.style.display="block";
+  kickBtn.disabled = true;
+  kickBtn.textContent = 'Conectado ✅';
 
   // Obtener username del custom token
-  const username = user.displayName || user.uid;
+  const username = user.displayName || user.uid.replace('kick_', '');
 
   // Guardar usuario en Firestore
   const ref = db.collection("users").doc(username);
@@ -438,7 +516,7 @@ auth.onAuthStateChanged(async user => {
 
   // Registrar que está viendo cuando carga la página
   try {
-    await fetch(BACKEND_URL + "/api/start-watching", {
+    await fetch(`${BACKEND_URL}/api/start-watching`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username })
@@ -449,9 +527,13 @@ auth.onAuthStateChanged(async user => {
   }
 
   // Mantener actividad cada 20 segundos
-  setInterval(async () => {
+  const activityInterval = setInterval(async () => {
+    if (!auth.currentUser) {
+      clearInterval(activityInterval);
+      return;
+    }
     try {
-      await fetch(BACKEND_URL + "/api/user-activity", {
+      await fetch(`${BACKEND_URL}/api/user-activity`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username })
@@ -461,10 +543,10 @@ auth.onAuthStateChanged(async user => {
     }
   }, 20000);
 
-  // Al cerrar sesión
+  // Cleanup al cerrar pestaña
   window.addEventListener("beforeunload", async () => {
     try {
-      await fetch(BACKEND_URL + "/api/stop-watching", {
+      await fetch(`${BACKEND_URL}/api/stop-watching`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username })
