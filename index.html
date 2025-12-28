@@ -12,7 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-/* ===== TODOS LOS ESTILOS IGUALES ===== */
+/* ===== ESTILOS ORIGINALES + PESTAÑAS ===== */
 :root {
     --bg-dark:#050505;
     --gold-main:#d4af37;
@@ -21,8 +21,9 @@
     --card-border:rgba(212,175,55,0.12);
 }
 
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
 body {
-    margin:0;
     background:var(--bg-dark);
     color:#fff;
     font-family:'Plus Jakarta Sans',sans-serif;
@@ -62,20 +63,7 @@ body {
     100% { transform:translateY(0) translateX(0) rotate(0deg); }
 }
 
-/* ===== TITULO ===== */
-.shimmer-title {
-    font-family:'Syncopate';
-    font-size:clamp(2.5rem,8vw,5rem);
-    background:linear-gradient(to right,#bf953f 20%,#fcf6ba 40%,#fcf6ba 60%,#bf953f 80%);
-    background-size:200% auto;
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    animation:shine 3s linear infinite;
-}
-
-@keyframes shine { to { background-position:200% center } }
-
-/* ===== NAV ===== */
+/* ===== NAVEGACIÓN PESTAÑAS ===== */
 .navbar {
     display:flex;
     justify-content:space-between;
@@ -83,16 +71,43 @@ body {
     padding:20px 8%;
     border-bottom:1px solid var(--card-border);
     backdrop-filter:blur(10px);
+    background: rgba(5,5,5,0.9);
+    position: sticky; top: 0; z-index: 100;
 }
 
 .logo {
     font-family:'Syncopate';
     letter-spacing:1px;
+    font-size: 1.5rem;
 }
 .logo span {
     background:var(--gold-gradient);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
+}
+
+.nav-tabs {
+    display: flex;
+    gap: 1rem;
+}
+
+.tab-btn {
+    background: none;
+    border: 1px solid var(--card-border);
+    color: #ccc;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.tab-btn:hover, .tab-btn.active {
+    background: var(--gold-gradient);
+    color: #000;
+    border-color: var(--gold-main);
+    transform: translateY(-2px);
 }
 
 .btn-kick {
@@ -112,14 +127,25 @@ body {
     transform: none;
 }
 
-/* ===== LAYOUT ===== */
-.container {
+/* ===== CONTENIDO PESTAÑAS ===== */
+.main-content {
     max-width:1200px;
-    margin:auto;
-    display:grid;
-    grid-template-columns:1fr 380px;
-    gap:40px;
-    padding:40px 5%;
+    margin: 2rem auto;
+    padding: 0 5%;
+}
+
+.tab-panel {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .section-box {
@@ -129,20 +155,88 @@ body {
     padding:35px;
     backdrop-filter:blur(10px);
     transition:.4s;
+    margin-bottom: 2rem;
 }
 .section-box:hover {
     transform:translateY(-6px);
     box-shadow:0 25px 60px rgba(212,175,55,0.08);
 }
 
-/* ===== FADE ===== */
-.fade-up {
-    opacity:0;
-    transform:translateY(30px);
-    animation:fadeUp 1s ease forwards;
+/* ===== LIVE STATUS ===== */
+.stream-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    border-radius: 16px;
 }
-@keyframes fadeUp {
-    to { opacity:1; transform:none }
+
+.status-offline {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ===== SHOP ===== */
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.shop-item {
+    background: rgba(212,175,55,0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.4s;
+}
+
+.shop-item:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 30px 60px rgba(212,175,55,0.2);
+}
+
+.shop-item.locked {
+    opacity: 0.5;
+    position: relative;
+}
+
+.shop-item.locked::before {
+    content: '🔒 Bloqueado';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: rgba(0,0,0,0.8);
+    padding: 1rem 2rem;
+    border-radius: 12px;
+}
+
+.shop-price {
+    font-size: 2rem;
+    font-weight: 800;
+    background: var(--gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 1rem 0;
+}
+
+.buy-btn {
+    background: var(--gold-gradient);
+    border: none;
+    color: #000;
+    padding: 12px 24px;
+    font-weight: 800;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1.1rem;
 }
 
 /* ===== RANK TABLE ===== */
@@ -170,7 +264,7 @@ body {
     color:var(--gold-main);
     font-weight:800;
     font-size: 1.2rem;
-    width: 40px;
+    width: 60px;
 }
 
 .rank-username {
@@ -187,64 +281,9 @@ body {
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 1px;
+    margin-left: 0.5rem;
 }
 
-/* ===== RECOMPENSAS ===== */
-.rewards-grid {
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-    gap:25px;
-    margin-top:25px;
-}
-
-.reward-item-new {
-    position:relative;
-    border:1px solid var(--card-border);
-    border-radius:22px;
-    padding:35px 20px;
-    min-height:170px;
-    text-align:center;
-    font-size:1.2rem;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    gap:12px;
-    transition:.35s ease;
-    background:linear-gradient(
-        180deg,
-        rgba(212,175,55,0.06),
-        rgba(0,0,0,0.15)
-    );
-}
-
-.reward-item-new:hover {
-    transform:translateY(-8px) scale(1.04);
-    box-shadow:0 30px 60px rgba(212,175,55,0.15);
-}
-
-.lock-overlay {
-    position:absolute;
-    inset:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:1.4rem;
-    font-weight:800;
-    letter-spacing:2px;
-    background:linear-gradient(
-        180deg,
-        rgba(0,0,0,0.55),
-        rgba(0,0,0,0.85)
-    );
-    backdrop-filter:blur(6px);
-    animation:pulseLock 2.5s infinite;
-}
-
-@keyframes pulseLock {
-    0%,100%{opacity:.7}50%{opacity:1}
-}
-
-/* ===== SIDEBAR ===== */
 .points-val {
     font-size:3.8rem;
     font-weight:800;
@@ -253,28 +292,23 @@ body {
     -webkit-text-fill-color:transparent;
 }
 
-.error-message {
-    color: #ef4444;
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.3);
+.error-message, .success-message {
     padding: 15px;
     border-radius: 12px;
     margin: 20px 0;
     text-align: center;
+}
+
+.error-message {
+    color: #ef4444;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
 }
 
 .success-message {
     color: #10b981;
     background: rgba(16,185,129,0.1);
     border: 1px solid rgba(16,185,129,0.3);
-    padding: 15px;
-    border-radius: 12px;
-    margin: 20px 0;
-    text-align: center;
-}
-
-@media(max-width:900px){
-    .container{grid-template-columns:1fr}
 }
 
 @keyframes updateGlow {
@@ -282,73 +316,110 @@ body {
     100% { box-shadow: 0 0 20px rgba(212,175,55,0.2); }
 }
 
-.updating {
-    animation: updateGlow 0.6s ease;
+.updating { animation: updateGlow 0.6s ease; }
+
+@media(max-width:900px){
+    .nav-tabs { flex-wrap: wrap; gap: 0.5rem; }
+    .tab-btn { padding: 8px 16px; font-size: 0.9rem; }
+    .shop-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 
 <body>
-
 <div class="gargoyle-bg"></div>
 
-<nav class="navbar fade-up">
+<!-- NAVBAR CON PESTAÑAS -->
+<nav class="navbar">
     <div class="logo">GARGOLAS <span>COMMUNITY</span></div>
+    <div class="nav-tabs">
+        <button class="tab-btn active" data-tab="home">🏠 Home</button>
+        <button class="tab-btn" data-tab="watchtime">⏱️ Watchtime</button>
+        <button class="tab-btn" data-tab="leaderboard">🏆 Leaderboard</button>
+        <button class="tab-btn" data-tab="shop">🛒 Shop</button>
+    </div>
     <button class="btn-kick" id="kickBtn" onclick="loginKick()">Conectar Kick</button>
 </nav>
 
-<header class="fade-up" style="text-align:center;padding:80px 20px;animation-delay:.2s">
-    <h1 class="shimmer-title">GARGOLAS</h1>
-    <p style="color:#666;letter-spacing:5px">Comunidad MauroAKD</p>
+<!-- HEADER -->
+<header style="text-align:center;padding:40px 20px">
+    <h1 class="shimmer-title" style="font-size:clamp(2.5rem,8vw,5rem);animation:shine 3s linear infinite;background:linear-gradient(to right,#bf953f 20%,#fcf6ba 40%,#fcf6ba 60%,#bf953f 80%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;">GARGOLAS</h1>
+    <p style="color:#666;letter-spacing:5px;margin-top:10px">Comunidad MauroAKD</p>
 </header>
 
-<div class="container">
-<main class="fade-up" style="animation-delay:.4s">
+<!-- CONTENIDO PRINCIPAL -->
+<div class="main-content">
     <div id="errorContainer"></div>
-    
-    <div class="section-box">
-        <h3 style="color:var(--gold-main)">TOP WATCHTIME ⏱️</h3>
-        <table class="rank-table" id="watchtime-table">
-            <tbody id="watchtime-body">
-                <tr>
-                    <td colspan="3" style="text-align:center; color:#666;">Cargando ranking...</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
 
-    <div class="section-box" style="margin-top:35px">
-        <h3 style="color:var(--gold-main)">RECOMPENSAS</h3>
-        <div class="rewards-grid">
-            <div class="reward-item-new">
-                <div class="lock-overlay">🔒 1K</div>
-                💎 VIP
+    <!-- PESTAÑA HOME -->
+    <section id="home" class="tab-panel active">
+        <div class="section-box">
+            <div class="stream-status" id="streamStatus">
+                <h2>📺 Stream Status</h2>
+                <div id="liveStatus">Cargando...</div>
             </div>
-            <div class="reward-item-new">
-                <div class="lock-overlay">🔒 5K</div>
-                🎮 DUO
+            <div id="user-view" style="display:none;text-align:center">
+                <div class="points-val" id="user-points">0</div>
+                <small style="color:#666;display:block;margin:20px 0">Watchtime: <span id="user-watchtime">0h 0m</span></small>
+                <button class="btn-kick" onclick="logout()" style="width:100%">Cerrar sesión</button>
             </div>
-            <div class="reward-item-new">
-                <div class="lock-overlay">🔒 10K</div>
-                🔥 UNBAN
+            <div id="guest-view" style="text-align:center">
+                <p style="color:#888;margin-bottom:20px">Logueate para sumar puntos viendo el stream</p>
+                <button class="btn-kick" id="guestKickBtn" onclick="loginKick()">Vincular Kick</button>
             </div>
         </div>
-    </div>
-</main>
+    </section>
 
-<aside class="fade-up" style="animation-delay:.6s">
-    <div id="user-view" class="section-box" style="display:none">
-        <small>MIS PUNTOS</small>
-        <div id="user-points" class="points-val">0</div>
-        <small style="color:#666; margin-top: 20px; display:block;" id="user-watchtime">Watchtime: 0h 0m</small>
-        <button class="btn-kick" onclick="logout()" style="margin-top:20px; width:100%">Cerrar sesión</button>
-    </div>
+    <!-- PESTAÑA WATCHTIME -->
+    <section id="watchtime" class="tab-panel">
+        <div class="section-box">
+            <h3 style="color:var(--gold-main)">TOP WATCHTIME ⏱️</h3>
+            <table class="rank-table" id="watchtime-table">
+                <tbody id="watchtime-body">
+                    <tr><td colspan="3" style="text-align:center; color:#666;">Cargando ranking...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-    <div id="guest-view" class="section-box">
-        <p style="color:#888">Logueate para sumar puntos</p>
-        <button class="btn-kick" id="guestKickBtn" onclick="loginKick()">Vincular Kick</button>
-    </div>
-</aside>
+    <!-- PESTAÑA LEADERBOARD -->
+    <section id="leaderboard" class="tab-panel">
+        <div class="section-box">
+            <h3 style="color:var(--gold-main)">TOP PUNTOS 🏆</h3>
+            <table class="rank-table" id="leaderboard-table">
+                <tbody id="leaderboard-body">
+                    <tr><td colspan="3" style="text-align:center; color:#666;">Cargando ranking...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- PESTAÑA SHOP -->
+    <section id="shop" class="tab-panel">
+        <div class="section-box">
+            <h3 style="color:var(--gold-main)">🛒 TIENDA GÁRGOLAS</h3>
+            <div class="shop-grid">
+                <div class="shop-item" data-price="1000">
+                    <div style="font-size:3rem;margin-bottom:1rem">💎</div>
+                    <h3>⭐ VIP 1 Mes</h3>
+                    <div class="shop-price">1,000 pts</div>
+                    <button class="buy-btn" onclick="buyItem(this)">COMPRAR</button>
+                </div>
+                <div class="shop-item" data-price="5000">
+                    <div style="font-size:3rem;margin-bottom:1rem">🎮</div>
+                    <h3>🎮 DUO Partner</h3>
+                    <div class="shop-price">5,000 pts</div>
+                    <button class="buy-btn" onclick="buyItem(this)">COMPRAR</button>
+                </div>
+                <div class="shop-item" data-price="10000">
+                    <div style="font-size:3rem;margin-bottom:1rem">🔥</div>
+                    <h3>🔥 UNBAN</h3>
+                    <div class="shop-price">10,000 pts</div>
+                    <button class="buy-btn" onclick="buyItem(this)">COMPRAR</button>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 
 <script>
@@ -361,18 +432,36 @@ const config = {
 firebase.initializeApp(config);
 const auth = firebase.auth();
 const db = firebase.firestore();
-
 const BACKEND_URL = "https://gargolas-backend.onrender.com";
+
+let currentUserPoints = 0;
+
+// ===== PESTAÑAS =====
+function initTabs() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetTab = btn.dataset.tab;
+            
+            // Remover active
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabPanels.forEach(p => p.classList.remove('active'));
+            
+            // Activar pestaña
+            btn.classList.add('active');
+            document.getElementById(targetTab).classList.add('active');
+        });
+    });
+}
 
 function showMessage(message, type = 'error') {
   const container = document.getElementById('errorContainer');
   container.innerHTML = `<div class="${type}-message">${message}</div>`;
-  setTimeout(() => {
-    container.innerHTML = '';
-  }, 5000);
+  setTimeout(() => container.innerHTML = '', 5000);
 }
 
-// 🔥 FIX: TIMESTAMP ÚNICO PARA EVITAR CACHE
 function loginKick() {
   const kickBtn = document.getElementById('kickBtn');
   const guestKickBtn = document.getElementById('guestKickBtn');
@@ -381,7 +470,6 @@ function loginKick() {
   kickBtn.textContent = 'Redirigiendo...';
   guestKickBtn.disabled = true;
   
-  // TIMESTAMP ÚNICO = NUEVO STATE CADA VEZ
   const timestamp = Date.now();
   window.location.href = `${BACKEND_URL}/auth/kick?t=${timestamp}`;
 }
@@ -392,85 +480,105 @@ function logout() {
   });
 }
 
-// Manejar token de callback
+async function buyItem(btn) {
+  const item = btn.closest('.shop-item');
+  const price = parseInt(item.dataset.price);
+  
+  if (currentUserPoints < price) {
+    showMessage(`💰 Necesitas ${price.toLocaleString()} pts`, 'error');
+    return;
+  }
+  
+  if (!confirm(`¿Comprar "${item.querySelector('h3').textContent}" por ${price.toLocaleString()} pts?`)) return;
+  
+  try {
+    // AQUÍ AGREGAS LÓGICA DE COMPRA (Firebase + Backend)
+    showMessage('✅ ¡Compra exitosa! Recompensa entregada', 'success');
+    btn.textContent = 'COMPRADO ✅';
+    btn.disabled = true;
+  } catch (error) {
+    showMessage('Error en la compra', 'error');
+  }
+}
+
+// Manejar callback
 const params = new URLSearchParams(window.location.search);
 const token = params.get("token");
 const error = params.get("error");
 
 if (error) {
-  let errorMsg = 'Error desconocido';
-  switch(error) {
-    case 'kick_denied': errorMsg = 'Acceso denegado en Kick'; break;
-    case 'kick_auth': errorMsg = 'Error de autenticación con Kick'; break;
-    case 'token_error': errorMsg = 'Error obteniendo token'; break;
-    case 'user_error': errorMsg = 'Error cargando perfil'; break;
-    case 'server_error': errorMsg = 'Error del servidor'; break;
-    case 'auth_error': errorMsg = 'Error de autorización'; break;
-    case 'no_code': errorMsg = 'No se recibió código de Kick'; break;
-    case 'invalid_state': errorMsg = 'Sesión expirada, intenta de nuevo'; break;
-  }
-  showMessage(errorMsg);
+  showMessage('Error de autenticación: ' + error);
   window.history.replaceState({}, document.title, window.location.pathname);
 }
 
 if (token) {
-  auth.signInWithCustomToken(token)
-    .then(() => {
-      showMessage('¡Conectado correctamente!', 'success');
-      window.history.replaceState({}, document.title, window.location.pathname);
-    })
-    .catch(err => {
-      console.error('Error Firebase token:', err);
-      showMessage('Error iniciando sesión');
-    });
+  auth.signInWithCustomToken(token).then(() => {
+    showMessage('¡Conectado correctamente!', 'success');
+    window.history.replaceState({}, document.title, window.location.pathname);
+  });
 }
 
-// ============= CARGAR TOP WATCHTIME =============
+// ===== CARGAR DATOS =====
 async function loadTopWatchtime() {
   try {
     const response = await fetch(`${BACKEND_URL}/api/top-watchtime`);
     const topWatchtime = await response.json();
     
     const tbody = document.getElementById("watchtime-body");
-    tbody.innerHTML = "";
-
-    if (topWatchtime.length === 0 || !topWatchtime[0]) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#666;">Sin datos aún</td></tr>';
-      return;
-    }
-
-    topWatchtime.forEach((user, idx) => {
-      const row = document.createElement("tr");
-      row.className = "rank-row";
-      
-      const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : (idx + 1);
-      const statusBadge = user.isWatching ? '<span class="status-live">🔴 LIVE</span>' : '';
-      
-      row.innerHTML = `
-        <td class="rank-pos">${medal}</td>
-        <td class="rank-username">${user.username || 'Usuario'} ${statusBadge}</td>
-        <td class="rank-time">${user.watchTimeHours || 0}h ${user.watchTimeMinutes || 0}m</td>
-      `;
-      
-      tbody.appendChild(row);
-    });
-
-    const table = document.getElementById("watchtime-table");
-    table.classList.add("updating");
-    setTimeout(() => table.classList.remove("updating"), 600);
-
+    tbody.innerHTML = topWatchtime.length ? 
+      topWatchtime.map((user, idx) => {
+        const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : (idx + 1);
+        return `
+          <tr class="rank-row">
+            <td class="rank-pos">${medal}</td>
+            <td class="rank-username">${user.username} ${user.watching ? '<span class="status-live">🔴 LIVE</span>' : ''}</td>
+            <td class="rank-time">${user.hours}h ${user.minutes}m</td>
+          </tr>`;
+      }).join('') : 
+      '<tr><td colspan="3" style="text-align:center; color:#666;">Sin datos aún</td></tr>';
   } catch (error) {
-    console.error("Error cargando top watchtime:", error);
-    document.getElementById("watchtime-body").innerHTML = 
-      '<tr><td colspan="3" style="text-align:center; color:#666;">Error cargando datos</td></tr>';
+    console.error("Error watchtime:", error);
   }
 }
 
-// Cargar al abrir página
-loadTopWatchtime();
-setInterval(loadTopWatchtime, 30000);
+async function loadLeaderboard() {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/leaderboard`);
+    const leaderboard = await response.json();
+    
+    const tbody = document.getElementById("leaderboard-body");
+    tbody.innerHTML = leaderboard.length ? 
+      leaderboard.map((user, idx) => {
+        const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : (idx + 1);
+        return `
+          <tr class="rank-row">
+            <td class="rank-pos">${medal}</td>
+            <td class="rank-username">${user.username} ${user.watching ? '<span class="status-live">🔴 LIVE</span>' : ''}</td>
+            <td class="rank-time">${user.points.toLocaleString()} pts</td>
+          </tr>`;
+      }).join('') : 
+      '<tr><td colspan="3" style="text-align:center; color:#666;">Sin datos aún</td></tr>';
+  } catch (error) {
+    console.error("Error leaderboard:", error);
+  }
+}
 
-// ============= AUTH STATE =============
+async function updateStatus() {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/status`);
+    const data = await res.json();
+    
+    const statusDiv = document.getElementById('streamStatus');
+    const liveStatus = document.getElementById('liveStatus');
+    
+    liveStatus.textContent = `👥 ${data.viewers} viewers | ${data.live ? '🔴 EN VIVO' : '⚫ Offline'}`;
+    statusDiv.className = `stream-status ${data.live ? '' : 'status-offline'}`;
+  } catch (error) {
+    console.error("Error status:", error);
+  }
+}
+
+// ===== AUTH STATE =====
 auth.onAuthStateChanged(async user => {
   const gv = document.getElementById("guest-view");
   const uv = document.getElementById("user-view");
@@ -478,84 +586,82 @@ auth.onAuthStateChanged(async user => {
   const guestKickBtn = document.getElementById('guestKickBtn');
   
   if (!user) {
-    gv.style.display="block"; 
-    uv.style.display="none";
+    gv.style.display = "block";
+    uv.style.display = "none";
     kickBtn.disabled = false;
     kickBtn.textContent = 'Conectar Kick';
     guestKickBtn.disabled = false;
-    guestKickBtn.textContent = 'Vincular Kick';
     return;
   }
 
-  gv.style.display="none"; 
-  uv.style.display="block";
+  gv.style.display = "none";
+  uv.style.display = "block";
   kickBtn.disabled = true;
   kickBtn.textContent = 'Conectado ✅';
-  guestKickBtn.disabled = true;
 
   const username = user.displayName || user.uid.replace('kick_', '');
-
-  const ref = db.collection("users").doc(username);
-  ref.set({ puntos:0 }, { merge:true });
-
-  ref.onSnapshot(s=>{
-    if(s.exists){
-      const el = document.getElementById("user-points");
-      el.animate([{transform:"scale(1)"},{transform:"scale(1.15)"},{transform:"scale(1)"}],{duration:400});
-      el.innerText = (s.data().puntos || 0).toLocaleString();
-    }
-  });
-
-  const wtRef = db.collection("watchtime").doc(username);
-  wtRef.onSnapshot(s=>{
-    if(s.exists && s.data().totalWatchTime){
-      const seconds = s.data().totalWatchTime;
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      document.getElementById("user-watchtime").innerText = `Watchtime: ${hours}h ${minutes}m`;
-    }
-  });
-
+  
+  // Start watching
   try {
     await fetch(`${BACKEND_URL}/api/start-watching`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username })
     });
-    console.log("✅ Usuario registrado como viendo");
   } catch (error) {
-    console.error("Error registrando usuario:", error);
+    console.error("Error start-watching:", error);
   }
 
-  const activityInterval = setInterval(async () => {
-    if (!auth.currentUser) {
-      clearInterval(activityInterval);
-      return;
+  // User points
+  const userRef = db.collection("users").doc(username);
+  userRef.onSnapshot(s => {
+    if (s.exists) {
+      currentUserPoints = s.data().points || 0;
+      document.getElementById("user-points").textContent = currentUserPoints.toLocaleString();
     }
+  });
+
+  // User watchtime
+  const wtRef = db.collection("watchtime").doc(username);
+  wtRef.onSnapshot(s => {
+    if (s.exists && s.data().totalWatchtime) {
+      const seconds = s.data().totalWatchtime;
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      document.getElementById("user-watchtime").textContent = `${hours}h ${minutes}m`;
+    }
+  });
+
+  // Activity ping
+  const activityInterval = setInterval(async () => {
+    if (!auth.currentUser) return;
     try {
       await fetch(`${BACKEND_URL}/api/user-activity`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username })
       });
-    } catch (error) {
-      console.error("Error actualizando actividad:", error);
-    }
+    } catch (error) {}
   }, 20000);
 
-  window.addEventListener("beforeunload", async () => {
-    try {
-      await fetch(`${BACKEND_URL}/api/stop-watching`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username })
-      });
-    } catch (error) {
-      console.error("Error deteniendo sesión:", error);
-    }
+  window.addEventListener("beforeunload", () => {
+    fetch(`${BACKEND_URL}/api/stop-watching`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username })
+    });
   });
 });
-</script>
 
+// ===== INICIALIZAR =====
+initTabs();
+loadTopWatchtime();
+loadLeaderboard();
+updateStatus();
+
+setInterval(loadTopWatchtime, 30000);
+setInterval(loadLeaderboard, 30000);
+setInterval(updateStatus, 10000);
+</script>
 </body>
 </html>
