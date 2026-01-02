@@ -1,716 +1,327 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gárgolas Community | MauroAKD</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gárgolas Community | MauroAKD</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<style>
-/* ===== TU CSS EXACTO SIN CAMBIOS ===== */
-:root {
-    --bg-dark:#050505;
-    --gold-main:#d4af37;
-    --gold-gradient:linear-gradient(135deg,#bf953f,#fcf6ba,#b38728,#fbf5b7,#aa771c);
-    --card-bg:rgba(255,255,255,0.02);
-    --card-border:rgba(212,175,55,0.12);
-}
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --gold-main: #d4af37;
+            --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            --card-bg: rgba(255, 255, 255, 0.02);
+            --card-border: rgba(212, 175, 55, 0.12);
+            --text-gray: #a0a0a0;
+        }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-    background:var(--bg-dark);
-    color:#fff;
-    font-family:'Plus Jakarta Sans',sans-serif;
-    overflow-x:hidden;
-}
+        body {
+            background: var(--bg-dark);
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
 
-/* FONDO GÁRGOLAS */
-.gargoyle-bg {
-    position:fixed;
-    inset:0;
-    z-index:-1;
-    pointer-events:none;
-    background:
-        radial-gradient(circle at 20% 30%, rgba(212,175,55,0.08), transparent 40%),
-        radial-gradient(circle at 80% 60%, rgba(212,175,55,0.06), transparent 45%);
-}
+        .gargoyle-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(212,175,55,0.08), transparent 40%),
+                radial-gradient(circle at 80% 60%, rgba(212,175,55,0.06), transparent 45%);
+        }
 
-.gargoyle-bg::before,
-.gargoyle-bg::after {
-    content:"🗿";
-    position:absolute;
-    font-size:160px;
-    opacity:0.04;
-    animation:floatGargoyle 30s linear infinite;
-}
+        /* NAVEGACIÓN */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            border-bottom: 1px solid var(--card-border);
+            backdrop-filter: blur(15px);
+            background: rgba(5, 5, 5, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
-.gargoyle-bg::after {
-    font-size:220px;
-    left:70%;
-    top:60%;
-    animation-duration:45s;
-}
+        .logo { font-family: 'Syncopate'; font-size: 1.1rem; }
+        .logo span { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-@keyframes floatGargoyle {
-    0% { transform:translateY(0) translateX(0) rotate(0deg); }
-    50% { transform:translateY(-140px) translateX(50px) rotate(5deg); }
-    100% { transform:translateY(0) translateX(0) rotate(0deg); }
-}
+        .nav-tabs { display: flex; gap: 8px; }
+        .tab-btn {
+            background: none;
+            border: 1px solid var(--card-border);
+            color: var(--text-gray);
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.85rem;
+        }
+        .tab-btn.active { background: var(--gold-gradient); color: #000; border-color: transparent; }
 
-/* NAVEGACIÓN */
-.navbar {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:20px 8%;
-    border-bottom:1px solid var(--card-border);
-    backdrop-filter:blur(10px);
-    background: rgba(5,5,5,0.9);
-    position: sticky; top: 0; z-index: 100;
-}
+        /* CONTENIDO PRINCIPAL */
+        .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 20px; }
+        .tab-panel { display: none; animation: fadeIn 0.4s ease-out; }
+        .tab-panel.active { display: block; }
 
-.logo {
-    font-family:'Syncopate';
-    letter-spacing:1px;
-    font-size: 1.5rem;
-}
-.logo span {
-    background:var(--gold-gradient);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-}
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-.nav-tabs {
-    display: flex;
-    gap: 1rem;
-}
+        .section-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
 
-.tab-btn {
-    background: none;
-    border: 1px solid var(--card-border);
-    color: #ccc;
-    padding: 10px 20px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s;
-    text-decoration: none;
-}
+        /* SISTEMA DE RACHAS (STREAKS) */
+        .streak-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            background: rgba(212, 175, 55, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px dashed var(--gold-main);
+            margin: 20px 0;
+        }
+        .streak-number { font-size: 2.5rem; font-weight: 800; color: #ff4500; text-shadow: 0 0 10px rgba(255,69,0,0.3); }
 
-.tab-btn:hover, .tab-btn.active {
-    background: var(--gold-gradient);
-    color: #000;
-    border-color: var(--gold-main);
-    transform: translateY(-2px);
-}
+        /* GRID DE TIENDA (CORREGIDO) */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
 
-.btn-kick {
-    background:var(--gold-gradient);
-    border:none;
-    padding:12px 24px;
-    font-weight:800;
-    border-radius:6px;
-    cursor:pointer;
-    transition:.3s;
-    color: #000;
-}
-.btn-kick:hover { transform:scale(1.05); }
-.btn-kick:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
+        .shop-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 18px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: 0.3s;
+        }
+        .shop-item:hover { transform: translateY(-3px); background: rgba(212, 175, 55, 0.05); border-color: var(--gold-main); }
+        .shop-item h4 { font-size: 0.9rem; margin: 10px 0; letter-spacing: 0.5px; text-transform: uppercase; }
 
-/* CONTENIDO */
-.main-content {
-    max-width:1200px;
-    margin: 2rem auto;
-    padding: 0 5%;
-}
+        .points-val {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 5px 0;
+        }
 
-.tab-panel {
-    display: none;
-    animation: fadeIn 0.5s ease;
-}
+        .btn-kick {
+            background: var(--gold-gradient);
+            border: none;
+            padding: 10px 20px;
+            font-weight: 800;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #000;
+            transition: 0.3s;
+            width: 100%;
+        }
+        .btn-kick:disabled { opacity: 0.5; filter: grayscale(1); }
 
-.tab-panel.active {
-    display: block;
-}
+        .success-message { color: #10b981; background: rgba(16,185,129,0.1); padding: 10px; border-radius: 8px; margin: 10px 0; text-align: center; }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.section-box {
-    background:var(--card-bg);
-    border:1px solid var(--card-border);
-    border-radius:26px;
-    padding:35px;
-    backdrop-filter:blur(10px);
-    transition:.4s;
-    margin-bottom: 2rem;
-}
-.section-box:hover {
-    transform:translateY(-6px);
-    box-shadow:0 25px 60px rgba(212,175,55,0.08);
-}
-
-/* LIVE STATUS */
-.stream-status {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: rgba(74, 222, 128, 0.1);
-    border: 1px solid rgba(74, 222, 128, 0.3);
-    border-radius: 16px;
-}
-
-.status-offline {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.3);
-}
-
-/* SHOP */
-.shop-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 2rem;
-}
-
-.shop-item {
-    background: rgba(212,175,55,0.05);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: 2rem;
-    text-align: center;
-    transition: all 0.4s;
-}
-
-.shop-item:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 30px 60px rgba(212,175,55,0.2);
-}
-
-.shop-item.locked {
-    opacity: 0.5;
-    position: relative;
-}
-
-.shop-item.locked::before {
-    content: '🔒 Bloqueado';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 1.5rem;
-    font-weight: 800;
-    background: rgba(0,0,0,0.8);
-    padding: 1rem 2rem;
-    border-radius: 12px;
-}
-
-.shop-price {
-    font-size: 2rem;
-    font-weight: 800;
-    background: var(--gold-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin: 1rem 0;
-}
-
-.buy-btn {
-    background: var(--gold-gradient);
-    border: none;
-    color: #000;
-    padding: 12px 24px;
-    font-weight: 800;
-    border-radius: 8px;
-    cursor: pointer;
-    width: 100%;
-    font-size: 1.1rem;
-}
-
-/* RANK TABLE */
-.rank-table {
-    width:100%;
-    border-collapse:collapse;
-    margin-top: 20px;
-}
-
-.rank-row {
-    border-bottom: 1px solid var(--card-border);
-    transition: 0.3s;
-}
-
-.rank-row:hover {
-    background: rgba(212,175,55,0.08);
-}
-
-.rank-row td {
-    padding:16px 12px;
-    text-align: left;
-}
-
-.rank-pos {
-    color:var(--gold-main);
-    font-weight:800;
-    font-size: 1.2rem;
-    width: 60px;
-}
-
-.rank-username {
-    font-weight: 600;
-}
-
-.rank-time {
-    color: #aaa;
-    text-align: right;
-}
-
-.status-live {
-    color: #4ade80;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin-left: 0.5rem;
-}
-
-.points-val {
-    font-size:3.8rem;
-    font-weight:800;
-    background:var(--gold-gradient);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-}
-
-.streak-info {
-    text-align:center;
-    background:rgba(255,215,0,0.1);
-    padding:20px;
-    border-radius:20px;
-    margin:20px 0;
-    border:1px solid rgba(255,215,0,0.3);
-}
-
-.error-message, .success-message {
-    padding: 15px;
-    border-radius: 12px;
-    margin: 20px 0;
-    text-align: center;
-}
-
-.error-message {
-    color: #ef4444;
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.3);
-}
-
-.success-message {
-    color: #10b981;
-    background: rgba(16,185,129,0.1);
-    border: 1px solid rgba(16,185,129,0.3);
-}
-
-@keyframes shine {
-    0%{background-position:200% 0;}
-    100%{background-position:-200% 0;}
-}
-
-@keyframes updateGlow {
-    0% { box-shadow: 0 0 0 rgba(212,175,55,0.5); }
-    100% { box-shadow: 0 0 20px rgba(212,175,55,0.2); }
-}
-
-.updating { animation: updateGlow 0.6s ease; }
-
-#liveAlerts {
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    z-index:1000;
-}
-
-.alert-pop {
-    background: linear-gradient(45deg, #FFD700, #FF4500);
-    color:#000;
-    padding:15px 25px;
-    border-radius:25px;
-    font-weight:bold;
-    font-size:1.2em;
-    margin:10px;
-    animation: slideIn 3s ease forwards;
-    box-shadow:0 10px 30px rgba(255,215,0,0.5);
-}
-
-@keyframes slideIn {
-    0% { transform: translateX(100%); opacity: 0; }
-    20% { opacity: 1; }
-    80% { opacity: 1; }
-    100% { transform: translateX(-100%); opacity: 0; }
-}
-
-@media(max-width:900px){
-    .nav-tabs { flex-wrap: wrap; gap: 0.5rem; }
-    .tab-btn { padding: 8px 16px; font-size: 0.9rem; }
-    .shop-grid { grid-template-columns: 1fr; }
-}
-</style>
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 15px; }
+            .nav-tabs { overflow-x: auto; width: 100%; justify-content: center; }
+        }
+    </style>
 </head>
 
 <body>
 <div class="gargoyle-bg"></div>
 
-<!-- NAVBAR CON PESTAÑAS -->
 <nav class="navbar">
     <div class="logo">GARGOLAS <span>COMMUNITY</span></div>
     <div class="nav-tabs">
-        <button class="tab-btn active" data-tab="home">🏠 Home</button>
-        <button class="tab-btn" data-tab="watchtime">⏱️ Watchtime</button>
-        <button class="tab-btn" data-tab="leaderboard">🏆 Leaderboard</button>
-        <button class="tab-btn" data-tab="streaks">🔥 Rachas</button>
-        <button class="tab-btn" data-tab="shop">🛒 Shop</button>
+        <button class="tab-btn active" onclick="switchTab('home')">🏠 Home</button>
+        <button class="tab-btn" onclick="switchTab('shop')">🛒 Shop</button>
+        <button class="tab-btn" onclick="switchTab('leaderboard')">🏆 Ranking</button>
     </div>
-    <button class="btn-kick" id="kickBtn">Conectar Kick</button>
+    <button class="btn-kick" id="mainAuthBtn" style="width: auto;" onclick="loginKick()">Conectar Kick</button>
 </nav>
 
-<!-- HEADER -->
-<header style="text-align:center;padding:40px 20px">
-    <h1 style="font-size:clamp(2.5rem,8vw,5rem);animation:shine 3s linear infinite;background:linear-gradient(to right,#bf953f 20%,#fcf6ba 40%,#fcf6ba 60%,#bf953f 80%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;">GARGOLAS</h1>
-    <p style="color:#666;letter-spacing:5px;margin-top:10px">Comunidad MauroAKD</p>
-</header>
-
-<!-- CONTENIDO PRINCIPAL -->
 <div class="main-content">
-    <div id="errorContainer"></div>
+    <div id="msgContainer"></div>
 
-    <!-- PESTAÑA HOME -->
     <section id="home" class="tab-panel active">
-        <div class="section-box">
-            <div class="stream-status" id="streamStatus">
-                <div style="flex:1">
-                    <h2>📺 Stream Status</h2>
-                    <div id="liveStatus">Cargando...</div>
+        <div class="section-box" style="text-align: center;">
+            <div id="userView" style="display:none;">
+                <h3>¡Bienvenido, <span id="userName">Gárgola</span>!</h3>
+                <div class="points-val" id="userPoints">0</div>
+                <p style="color:var(--text-gray)">PUNTOS ACTUALES</p>
+
+                <div class="streak-container">
+                    <div>
+                        <div class="streak-number" id="streakVal">0</div>
+                        <p>DÍAS DE RACHA 🔥</p>
+                    </div>
+                    <button class="btn-kick" id="streakBtn" style="width: auto;" onclick="claimDaily()">¡PRESENTE!</button>
                 </div>
+                <p id="streakInfo" style="font-size: 0.8rem; color: #888;">Marca presente cada 24hs para no perder tu racha.</p>
             </div>
-            
-            <div id="user-view" style="display:none;text-align:center">
-                <div class="points-val" id="user-points">0</div>
-                
-                <div class="streak-info" id="streakInfo" style="display:none;">
-                    <div class="points-val" id="streakMultiplier">x1</div>
-                    <p>Racha: <span id="streakDays">1</span>/3 días</p>
-                    <button class="btn-kick" id="presenteBtn">🎁 ¡PRESENTE!</button>
-                </div>
-                
-                <small style="color:#666;display:block;margin:20px 0">Watchtime: <span id="user-watchtime">0h 0m</span></small>
-                <button class="btn-kick" onclick="logout()" style="width:100%">Cerrar sesión</button>
-            </div>
-            
-            <div id="guest-view" style="text-align:center">
-                <p style="color:#888;margin-bottom:20px">Logueate para sumar puntos viendo el stream</p>
-                <button class="btn-kick" id="guestKickBtn">Vincular Kick</button>
+
+            <div id="guestView">
+                <p>Inicia sesión para ver tu racha y puntos.</p>
+                <br>
+                <button class="btn-kick" style="width: auto;" onclick="loginKick()">VINCULAR KICK</button>
             </div>
         </div>
     </section>
 
-    <!-- WATCHTIME -->
-    <section id="watchtime" class="tab-panel">
-        <div class="section-box">
-            <h3 style="color:var(--gold-main)">TOP WATCHTIME ⏱️</h3>
-            <table class="rank-table">
-                <tbody id="watchtime-body">
-                    <tr><td colspan="3" style="text-align:center; color:#666;">Cargando ranking...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- LEADERBOARD -->
-    <section id="leaderboard" class="tab-panel">
-        <div class="section-box">
-            <h3 style="color:var(--gold-main)">TOP PUNTOS 🏆</h3>
-            <table class="rank-table">
-                <tbody id="leaderboard-body">
-                    <tr><td colspan="3" style="text-align:center; color:#666;">Cargando ranking...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- RACHAS -->
-    <section id="streaks" class="tab-panel">
-        <div class="section-box">
-            <h3 style="color:var(--gold-main)">🔥 TOP RACHAS</h3>
-            <table class="rank-table">
-                <tbody id="streaks-body">
-                    <tr><td colspan="3" style="text-align:center; color:#666;">Cargando rachas...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- SHOP -->
     <section id="shop" class="tab-panel">
         <div class="section-box">
-            <h3 style="color:var(--gold-main)">🛒 TIENDA GÁRGOLAS</h3>
-            <div class="shop-grid">
-                <div class="shop-item" data-price="1000">
-                    <div style="font-size:3rem;margin-bottom:1rem">💎</div>
-                    <h3>⭐ VIP 1 Mes</h3>
-                    <div class="shop-price">1,000 pts</div>
-                    <button class="buy-btn" onclick="buyItem(this)">COMPRAR</button>
+            <h3 style="color:var(--gold-main); text-align: center;">🛒 TIENDA DE RECOMPENSAS</h3>
+            <div class="shop-grid" id="shopGrid">
                 </div>
-                <div class="shop-item" data-price="5000">
-                    <div style="font-size:3rem;margin-bottom:1rem">🎮</div>
-                    <h3>🎮 DUO Partner</h3>
-                    <div class="shop-price">5,000 pts</div>
-                    <button class="buy-btn" onclick="buyItem(this)">COMPRAR</button>
-                </div>
-                <div class="shop-item" data-price="10000">
-                    <div style="font-size:3rem;margin-bottom:1rem">🔥</div>
-                    <h3>🔥 UNBAN</h3>
-                    <div class="shop-price">10,000 pts</div>
-                    <button class="buy-btn" onclick="buyItem(this)">COMPRAR</button>
-                </div>
-            </div>
+        </div>
+    </section>
+
+    <section id="leaderboard" class="tab-panel">
+        <div class="section-box">
+            <h3 style="color:var(--gold-main)">🏆 TOP GÁRGOLAS</h3>
+            <div id="leaderboardContent" style="margin-top: 20px; color: var(--text-gray);">Cargando ranking...</div>
         </div>
     </section>
 </div>
 
-<div id="liveAlerts"></div>
-
 <script>
-const config = {
-  apiKey: "TU_API_KEY_AQUI", // ← CAMBIA ESTO POR TU FIREBASE KEY
-  authDomain: "gargolascommunity.firebaseapp.com",
-  projectId: "gargolascommunity"
+// CONFIGURACIÓN FIREBASE
+const firebaseConfig = {
+    apiKey: "TU_API_KEY",
+    authDomain: "gargolascommunity.firebaseapp.com",
+    projectId: "gargolascommunity"
 };
 
-firebase.initializeApp(config);
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 const BACKEND_URL = "https://gargolas-backend.onrender.com";
 
-let currentUserPoints = 0;
+// LISTA DE RECOMPENSAS SEGÚN IMAGEN
+const rewards = [
+    { name: "Hamburguesa 15k Max", price: 15000, icon: "🍔" },
+    { name: "Tipeo 10k", price: 10000, icon: "⌨️" },
+    { name: "Tipeo 5k", price: 5000, icon: "⌨️" },
+    { name: "Juego de Steam (Max 10)", price: 20000, icon: "🎮" },
+    { name: "Sub Kick", price: 8000, icon: "💎" },
+    { name: "Tipeo de 50k", price: 50000, icon: "⌨️" },
+    { name: "Caja de CS", price: 12000, icon: "📦" },
+    { name: "Premier CS", price: 25000, icon: "🔫" },
+    { name: "Discord Nitro", price: 10000, icon: "👾" },
+    { name: "Moderador", price: 100000, icon: "🛠️" },
+    { name: "FC 26", price: 70000, icon: "⚽" },
+    { name: "Baile TikTok", price: 4000, icon: "💃" },
+    { name: "Historia IG (Lo que quieras)", price: 6000, icon: "📸" },
+    { name: "Periférico PC 40k", price: 40000, icon: "🖱️" },
+    { name: "7TV Premium", price: 5000, icon: "📺" },
+    { name: "Spotify Premium", price: 5000, icon: "🎧" },
+    { name: "Zapatilla 47 Street", price: 60000, icon: "👟" },
+    { name: "Botines 100k Max", price: 100000, icon: "👟" }
+];
 
-// ===== FUNCIONES GLOBALES (para onclick) =====
-function showMessage(message, type = 'error') {
-  const container = document.getElementById('errorContainer');
-  container.innerHTML = `<div class="${type}-message">${message}</div>`;
-  setTimeout(() => container.innerHTML = '', 5000);
+// RENDERIZAR TIENDA
+function renderShop() {
+    const grid = document.getElementById('shopGrid');
+    grid.innerHTML = rewards.map(item => `
+        <div class="shop-item">
+            <span>${item.icon}</span>
+            <h4>${item.name}</h4>
+            <div class="points-val" style="font-size: 1.2rem;">${item.price.toLocaleString()}</div>
+            <button class="btn-kick" onclick="buyItem('${item.name}', ${item.price})">CANJEAR</button>
+        </div>
+    `).join('');
 }
 
-function loginKick() {
-  const kickBtn = document.getElementById('kickBtn');
-  const guestKickBtn = document.getElementById('guestKickBtn');
-  
-  kickBtn.disabled = true;
-  kickBtn.textContent = 'Redirigiendo...';
-  if(guestKickBtn) guestKickBtn.disabled = true;
-  
-  window.location.href = `${BACKEND_URL}/auth/kick?t=${Date.now()}`;
-}
-
-function logout() {
-  auth.signOut().then(() => {
-    showMessage('Sesión cerrada correctamente', 'success');
-  });
-}
-
-function buyItem(btn) {
-  const item = btn.closest('.shop-item');
-  const price = parseInt(item.dataset.price);
-  
-  if (currentUserPoints < price) {
-    showMessage(`💰 Necesitas ${price.toLocaleString()} pts`, 'error');
-    return;
-  }
-  
-  if (!confirm(`¿Comprar "${item.querySelector('h3').textContent}" por ${price.toLocaleString()} pts?`)) return;
-  
-  const username = auth.currentUser?.displayName || 'guest';
-  
-  fetch(`${BACKEND_URL}/api/redeem`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, item: item.querySelector('h3').textContent })
-  }).then(res => res.json()).then(data => {
-    showMessage(data.alert || '✅ ¡Compra exitosa!', 'success');
-    btn.textContent = 'COMPRADO ✅';
+// LOGICA DE RACHAS (CLAIM DAILY)
+async function claimDaily() {
+    const btn = document.getElementById('streakBtn');
     btn.disabled = true;
-    btn.style.opacity = '0.7';
-    showLiveAlert(data.alert || `🎉 ${username} canjeó en la tienda!`);
-  }).catch(() => {
-    showMessage('✅ ¡Compra exitosa! Recompensa entregada', 'success');
-    btn.textContent = 'COMPRADO ✅';
-    btn.disabled = true;
-    btn.style.opacity = '0.7';
-  });
-}
-
-function checkPresente() {
-  const btn = document.getElementById('presenteBtn');
-  btn.disabled = true;
-  btn.textContent = 'Verificando...';
-  
-  const username = auth.currentUser?.displayName || 'guest';
-  
-  fetch(`${BACKEND_URL}/api/presente`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username })
-  }).then(res => res.json()).then(data => {
-    if (data.success) {
-      showMessage(data.message, 'success');
-      document.getElementById('streakDays').textContent = data.streak;
-      document.getElementById('streakMultiplier').textContent = `x${data.multiplier}`;
-      document.getElementById('streakInfo').style.display = 'block';
-    } else {
-      showMessage(data.error, 'error');
-    }
-  }).catch(() => {
-    showMessage('Error de conexión', 'error');
-  }).finally(() => {
+    try {
+        const username = auth.currentUser.displayName;
+        const res = await fetch(`${BACKEND_URL}/api/presente`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        
+        if(data.success) {
+            notify(`¡Racha aumentada! Tienes ${data.streak} días 🔥`);
+            document.getElementById('streakVal').textContent = data.streak;
+        } else {
+            notify(data.error, 'error');
+        }
+    } catch(e) { notify("Error de servidor", "error"); }
     btn.disabled = false;
-    btn.textContent = '🎁 ¡PRESENTE!';
-  });
 }
 
-function showLiveAlert(message) {
-  const alert = document.createElement('div');
-  alert.className = 'alert-pop';
-  alert.innerHTML = message;
-  document.getElementById('liveAlerts').appendChild(alert);
-  setTimeout(() => alert.remove(), 3000);
+// FUNCIONES DE SOPORTE
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
 }
 
-// ===== INICIALIZACIÓN =====
-document.addEventListener('DOMContentLoaded', function() {
-  // Pestañas
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(btn.dataset.tab).classList.add('active');
-    });
-  });
-  
-  // Botones
-  document.getElementById('kickBtn').addEventListener('click', loginKick);
-  document.getElementById('guestKickBtn').addEventListener('click', loginKick);
-  document.getElementById('presenteBtn').addEventListener('click', checkPresente);
-  
-  // Auth callback
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('token')) {
-    auth.signInWithCustomToken(params.get('token')).then(() => {
-      showMessage('✅ ¡Conectado correctamente!', 'success');
-      window.history.replaceState({}, '', window.location.pathname);
-    });
-  }
-  
-  // Auto refresh
-  setInterval(updateStatus, 10000);
-  setInterval(loadTopWatchtime, 30000);
-  setInterval(loadLeaderboard, 30000);
-  setInterval(loadStreaks, 30000);
-  
-  updateStatus();
-  loadTopWatchtime();
-  loadLeaderboard();
-  loadStreaks();
+function notify(msg, type = 'success') {
+    const container = document.getElementById('msgContainer');
+    container.innerHTML = `<div class="${type}-message">${msg}</div>`;
+    setTimeout(() => container.innerHTML = '', 4000);
+}
+
+function loginKick() { window.location.href = `${BACKEND_URL}/auth/kick`; }
+
+auth.onAuthStateChanged(user => {
+    if (user) {
+        document.getElementById('userView').style.display = 'block';
+        document.getElementById('guestView').style.display = 'none';
+        const username = user.displayName || user.uid.split('_')[1];
+        document.getElementById('userName').textContent = username;
+        
+        db.collection('users').doc(username).onSnapshot(doc => {
+            if(doc.exists) {
+                document.getElementById('userPoints').textContent = (doc.data().points || 0).toLocaleString();
+                document.getElementById('streakVal').textContent = doc.data().streak || 0;
+            }
+        });
+    }
 });
 
-// ===== API FUNCTIONS =====
-async function updateStatus() {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/status`);
-    const data = await res.json();
-    document.getElementById('liveStatus').textContent = `👥 ${data.viewers} viewers | ${data.live ? '🔴 EN VIVO' : '⚫ Offline'}`;
-    document.getElementById('streamStatus').className = `stream-status ${data.live ? '' : 'status-offline'}`;
-  } catch(e) {}
-}
-
-async function loadTopWatchtime() {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/top-watchtime`);
-    const data = await res.json();
-    document.getElementById('watchtime-body').innerHTML = data.map((user,i) => `
-      <tr class="rank-row">
-        <td class="rank-pos">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
-        <td>${user.username} ${user.watching?'<span class="status-live">🔴 LIVE</span>':''}</td>
-        <td class="rank-time">${user.hours}h ${user.minutes}m</td>
-      </tr>
-    `).join('') || '<tr><td colspan="3" style="text-align:center;color:#666;">Sin datos</td></tr>';
-  } catch(e) {}
-}
-
-async function loadLeaderboard() {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/leaderboard`);
-    const data = await res.json();
-    document.getElementById('leaderboard-body').innerHTML = data.map((user,i) => `
-      <tr class="rank-row">
-        <td class="rank-pos">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
-        <td>${user.username} ${user.watching?'<span class="status-live">🔴 LIVE</span>':''}</td>
-        <td class="rank-time">${user.points.toLocaleString()} pts</td>
-      </tr>
-    `).join('') || '<tr><td colspan="3" style="text-align:center;color:#666;">Sin datos</td></tr>';
-  } catch(e) {}
-}
-
-async function loadStreaks() {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/streaks`);
-    const data = await res.json();
-    document.getElementById('streaks-body').innerHTML = data.map((user,i) => `
-      <tr class="rank-row">
-        <td class="rank-pos">${i+1}🔥</td>
-        <td>${user.username} <span class="status-live">x${user.multiplier}</span></td>
-        <td class="rank-time">${user.points.toLocaleString()} pts</td>
-      </tr>
-    `).join('') || '<tr><td colspan="3" style="text-align:center;color:#666;">Sin rachas</td></tr>';
-  } catch(e) {}
-}
-
-// Auth state
-auth.onAuthStateChanged(user => {
-  const guestView = document.getElementById('guest-view');
-  const userView = document.getElementById('user-view');
-  const kickBtn = document.getElementById('kickBtn');
-  
-  if (user) {
-    guestView.style.display = 'none';
-    userView.style.display = 'block';
-    kickBtn.textContent = 'Conectado ✅';
-    kickBtn.disabled = true;
-    
-    const username = user.displayName || user.uid.replace('kick_', '');
-    document.getElementById('user-points').textContent = '0';
-    
-    // User data
-    db.collection('users').doc(username).onSnapshot(doc => {
-      if (doc.exists) {
-        currentUserPoints = doc.data().points || 0;
-        document.getElementById('user-points').textContent = currentUserPoints.toLocaleString();
-      }
-    });
-  } else {
-    guestView.style.display = 'block';
-    userView.style.display = 'none';
-    kickBtn.textContent = 'Conectar Kick';
-    kickBtn.disabled = false;
-  }
+document.addEventListener('DOMContentLoaded', () => {
+    renderShop();
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('token')) {
+        auth.signInWithCustomToken(urlParams.get('token')).then(() => {
+            window.history.replaceState({}, '', '/');
+        });
+    }
 });
 </script>
 </body>
